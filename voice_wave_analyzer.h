@@ -11,7 +11,7 @@
 struct Cycle {
 	int index;
 	int length;
-}
+};
 
 
 /*
@@ -36,7 +36,7 @@ class VoiceWaveAnalyzer {
 		std::cout << "DFF now in progress..." << std::endl;
 
 		int dsize = 100; // 相関関数の幅（Hz）
-		int fixSize = 100; // 零点修正誤差範囲（Hz）
+		int fixSize = 10; // 零点修正誤差範囲（Hz）
 
 
 		int index = 0;
@@ -51,7 +51,7 @@ class VoiceWaveAnalyzer {
 			for (int i = minLength; i < maxLength; i++) {
 				double r = 0;
 				for (int j = 0; j < dsize; j++) {
-					r += input[index + j] * input[index + j + i]
+					r += input[index + j] * input[index + j + i];
 				}
 				if (r > maxR) {
 					// 最大の部分を保存
@@ -75,7 +75,7 @@ class VoiceWaveAnalyzer {
 					fixedIndexes.push_back(index + j);
 					break;
 				}
-				if ((index - m - 1 > 0)
+				if ((index - j - 1 > 0)
 					&& (input[index - j] * input[index - j - 1] <= 0)) {
 					fixedIndexes.push_back(index - j);
 					break;
@@ -83,9 +83,10 @@ class VoiceWaveAnalyzer {
 			}
 		}
 
-		std::cout << "零点検出率 : " << 100.0*fixedIndexes.size() / indexes.size() << "%" << std::endl;
+		std::cout << "零点検出率 : " << 100.0 * fixedIndexes.size() / indexes.size() << "%" << std::endl;
 
-		return std::vector<Cycle>;
+		return std::vector<Cycle>();
 	}
 
-}
+};
+
