@@ -105,7 +105,8 @@ class VoiceWaveAnalyzer {
             }
         }
 
-        std::cout << "範囲外率 : " << 100.0 * cycles.size() / fixedIndexes.size() << "%" << std::endl << std::endl;
+        std::cout << "範囲外率 : " << 100.0 * cycles.size() / fixedIndexes.size() << "%" << std::endl;
+        std::cout << "周期 : " << cycles.size() << "個" << std::endl << std::endl;
 
 		return cycles;
 	}
