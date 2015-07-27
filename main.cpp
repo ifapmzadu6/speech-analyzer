@@ -2,6 +2,8 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <climits>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -62,7 +64,7 @@ int main() {
         inputCycles.push_back(inputCycle);
     }
 
-    Gnuplot<double>::OutputToGnuplot(inputCycles, "p 'output.txt' w l lc rgb '#F0FF0000'");
+    //Gnuplot<double>::OutputToGnuplot(inputCycles, "p 'output.txt' w l lc rgb '#F0FF0000'");
 
 
     // クラスタリング
@@ -70,7 +72,7 @@ int main() {
     int dim = targetFrequency + padding;
     KMeansMethodResult result = KMeansMethod::Clustering(inputCycles, dim, countOfCluster);
 
-    Gnuplot<double>::OutputToGnuplot(result.clusters, "p 'output.txt' w l");
+    //Gnuplot<double>::OutputToGnuplot(result.clusters, "p 'output.txt' w l");
 
 
     // エラー率を算出
@@ -89,7 +91,7 @@ int main() {
         errors.push_back(error);
     }
 
-    Gnuplot<double>::OutputToGnuplot(errors, "p 'output.txt' w l");
+    //Gnuplot<double>::OutputToGnuplot(errors, "p 'output.txt' w l");
 
     Gnuplot<int>::OutputToGnuplot(result.indexOfCluster, "p 'output.txt'");
 
