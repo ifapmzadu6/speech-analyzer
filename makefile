@@ -2,8 +2,11 @@
 
 TARGET = main
 
-ifeq ($(OS), Windows_NT)
-	TARGET = main.exe
+
+ifeq (\$(OS),WINDOWS_NT)
+	EXTENTION = ".exe"
+else
+	EXTENTION = ".out"
 endif
 
 
@@ -12,13 +15,13 @@ CXXFLAGS = -O2 -Wall
 LDFLAGS = -lm
 LIBS = -std=c++11 -stdlib=libc++
 
-HEADS = $(shell ls *.h)
-SRCS = $(shell ls *.cpp)
+HEADS := $(wildcard *.h)
+SRCS := $(wildcard *.cpp)
 OBJS = $(SRCS:.cpp=.o)
 
-$(TARGET): $(OBJS) $(HEADS)
-	$(CXX) -o main.out main.cpp wave.cpp $(LIBS)
+$(TARGET)$(EXTENTION): $(OBJS) $(HEADS)
+	$(CXX) -o $(TARGET)$(EXTENTION) $(SRCS) $(LIBS)
 
 clean:
-	rm $(OBJS) $(TARGET)
+	rm $(OBJS) $(TARGET)$(EXTENTION)
 
