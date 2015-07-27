@@ -1,13 +1,7 @@
 
 
 TARGET = main
-
-
-ifeq (\$(OS),WINDOWS_NT)
-	EXTENTION = ".exe"
-else
-	EXTENTION = ".out"
-endif
+EXTENTION = .out
 
 
 CXX = clang++
