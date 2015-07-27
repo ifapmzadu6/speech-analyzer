@@ -90,7 +90,7 @@ int Wave::WavHdrRead()
 		if(memcmp( chunk.hdrFmtData, STR_fmt, sizeof chunk.hdrFmtData) == 0)
 		{
 			len = chunk.sizeOfFmtData;
-			std::cout << "\"fmt \"の長さ: "<< len <<" [bytes]\n" << std::endl;
+			//std::cout << "\"fmt \"の長さ: "<< len <<" [bytes]\n" << std::endl;
 			cursor = fin.tellg();
 			if(ReadfmtChunk(&fin)!=0)   
 				return -1;
@@ -103,7 +103,7 @@ int Wave::WavHdrRead()
 		else if(memcmp(chunk.hdrFmtData, STR_data, 4) == 0)
         {
             sizeOfData = chunk.sizeOfFmtData;
-			std::cout << "\n\"data\" の長さ: "<<sizeOfData <<" [bytes]\n" << std::endl;
+			//std::cout << "\n\"data\" の長さ: "<<sizeOfData <<" [bytes]\n" << std::endl;
 			posOfData = fin.tellg();
 			fin.seekg(sizeOfData + posOfData - 4,std::ios_base::beg);
         }

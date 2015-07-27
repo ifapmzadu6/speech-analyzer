@@ -34,8 +34,9 @@ std::vector<double> getInput() {
 int main() {
 
     std::vector<double> input = getInput();
+    std::cout << std::endl;
     std::cout << "入力: " << input.size() << " 個のサンプル" << std::endl << std::endl;
-
+    
     // 周期を解析
     int samplingFrequency = 44100;
     int targetFrequency = 360;
@@ -61,14 +62,15 @@ int main() {
         inputCycles.push_back(inputCycle);
     }
 
-    Gnuplot<double>::OutputToGnuplot(inputCycles, "plot 'output.txt' w l lc rgb '#F0FF0000'");
+    Gnuplot<double>::OutputToGnuplot(inputCycles, "p 'output.txt' w l lc rgb '#F0FF0000'");
+
 
     // クラスタリング
     int countOfCluster = 4;
     int dim = targetFrequency + padding;
     KMeansMethodResult result = KMeansMethod::Clustering(inputCycles, dim, countOfCluster);
 
-    Gnuplot<double>::OutputToGnuplot(result.clusters, "plot 'output.txt' w l");
+    Gnuplot<double>::OutputToGnuplot(result.clusters, "p 'output.txt' w l");
 
 
     // エラー率を算出
@@ -87,9 +89,9 @@ int main() {
         errors.push_back(error);
     }
 
-    Gnuplot<double>::OutputToGnuplot(errors, "plot 'output.txt' w l");
+    Gnuplot<double>::OutputToGnuplot(errors, "p 'output.txt' w l");
 
-    Gnuplot<int>::OutputToGnuplot(result.indexOfCluster, "plot 'output.txt'");
+    Gnuplot<int>::OutputToGnuplot(result.indexOfCluster, "p 'output.txt'");
 
 
     return 0;
