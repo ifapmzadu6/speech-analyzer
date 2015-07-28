@@ -5,16 +5,13 @@
 
 
 
-// 明示的テンプレート宣言
-template void Gnuplot<int>::OutputToGnuplot(std::vector<int> &output, const char *query);
-template void Gnuplot<double>::OutputToGnuplot(std::vector<double> &output, const char *query);
-template void Gnuplot<int>::OutputToGnuplot(std::vector<int> &output, const char *query, const char *filename);
-template void Gnuplot<double>::OutputToGnuplot(std::vector<double> &output, const char *query, const char *filename);
-
-
+template<typename T>
+void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option) {
+    OutputToGnuplot(output, option, "output.txt");
+}
 
 template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *query, const char *filename) {
+void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option, const char *filename) {
     std::ofstream ofs(filename);
     for (int i = 0; i < output.size(); i++) {
         ofs << i << " " << output[i] << std::endl;
@@ -22,36 +19,45 @@ void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *query, cons
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
-    fprintf(gnuplot, "%s", query);
+    if (option == nullptr) {
+        fprintf(gnuplot, "p \'%s\'", filename);
+    }
+    else {
+        fprintf(gnuplot, "p \'%s\' %s", filename, option);
+    }
     pclose(gnuplot);
 }
 
+
+
 template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *query) {
-    OutputToGnuplot(output, query, "output.txt");
+void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T> > &outputs, const char *option) {
+    Output2DToGnuplot(outputs, option, "output.txt");
 }
 
-
 template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<std::vector<T> > &outputs, const char *query, const char *filename) {
+void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T> > &outputs, const char *option, const char *filename) {
     std::ofstream ofs(filename);
     for (int i = 0; i < outputs.size(); i++) {
-        std::vector<T> output = outputs[i];
-        for (int j = 0; j < output.size(); j++) {
-            ofs << j << " " << output[j] << std::endl;
+        ofs << j;
+        for (int j = 0; j < outputs[i].size(); j++) {
+            ofs << " " << outputs[i][j];
         }
         ofs << std::endl;
     }
     ofs.close();
 
+    int col = outputs[0].size();
     FILE *gnuplot = popen("gnuplot", "w");
-    fprintf(gnuplot, "%s", query);
-    pclose(gnuplot);
-}
 
-template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<std::vector<T> > &outputs, const char *query) {
-    OutputToGnuplot(outputs, query, "output.txt");
+    if (option == nullptr) {
+        fprintf(gnuplot, "p \'%s\'", filename);
+    }
+    else {
+        fprintf(gnuplot, "p \'%s\' %s", filename, option);
+    }
+
+    pclose(gnuplot);
 }
 
 

@@ -16,7 +16,7 @@
 std::vector<double> getInput() {
     std::vector<double> tmp;
     Wave wav;
-    if (wav.InputWave("sample.wav") != 0) {
+    if (wav.InputWave("./resources/sample.wav") != 0) {
         abort();
     }
     wav.Normalize();
@@ -64,7 +64,7 @@ int main() {
         inputCycles.push_back(inputCycle);
     }
 
-    //Gnuplot<double>::OutputToGnuplot(inputCycles, "p 'output.txt' w l lc rgb '#F0FF0000'");
+    Gnuplot<double>::Output2DToGnuplot(inputCycles, "w l lc rgb '#F0FF0000'");
 
 
     // クラスタリング
@@ -72,7 +72,7 @@ int main() {
     int dim = targetFrequency + padding;
     KMeansMethodResult result = KMeansMethod::Clustering(inputCycles, dim, countOfCluster);
 
-    //Gnuplot<double>::OutputToGnuplot(result.clusters, "p 'output.txt' w l");
+    Gnuplot<double>::Output2DToGnuplot(result.clusters, "w l");
 
 
     // エラー率を算出
@@ -91,10 +91,22 @@ int main() {
         errors.push_back(error);
     }
 
-    //Gnuplot<double>::OutputToGnuplot(errors, "p 'output.txt' w l");
+    Gnuplot<double>::OutputToGnuplot(errors, "w l");
 
-    Gnuplot<int>::OutputToGnuplot(result.indexOfCluster, "p 'output.txt'");
+    Gnuplot<int>::OutputToGnuplot(result.indexOfCluster, nullptr);
 
+    // 積分(=エネルギーを見る)
+    std::vector<double> energy;
+    for (int i = 0; i < inputCycles.size(); i++) {
+        std::vector<double> inputCycle = inputCycles[i];
+        double e = 0;
+        for (int j = 0; j < inputCycle.size(); j++) {
+            e += std::abs(inputCycle[j]);
+        }
+        energy.push_back(e);
+    }
+
+    Gnuplot<double>::OutputToGnuplot(energy, "w l");
 
     return 0;
 }
