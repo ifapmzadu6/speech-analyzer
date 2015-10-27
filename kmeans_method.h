@@ -3,7 +3,7 @@
 
 
 struct KMeansMethodResult {
-    std::vector<std::vector<double> > clusters;
+    std::vector<std::vector<double>> clusters;
     std::vector<int> indexOfCluster;
 };
 
@@ -11,14 +11,14 @@ struct KMeansMethodResult {
 class KMeansMethod {
 public:
 
-    static KMeansMethodResult Clustering(const std::vector<std::vector<double> > &inputs,
+    static KMeansMethodResult Clustering(const std::vector<std::vector<double>> &inputs,
             const int dim,
             const double countOfCluster);
 
 
 private:
 
-    static std::vector<int> getInitialClusterOfInputs(const std::vector<std::vector<double> > &inputs,
+    static std::vector<int> getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs,
             const int dim,
             const double countOfCluster);
 

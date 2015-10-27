@@ -1,0 +1,40 @@
+#include <fstream>
+
+#include "julius_importer.h"
+
+std::vector<std::string> split(const std::string &str, char delim);
+
+std::vector<JuliusResult> JuliusImporter::getJuliusResults() {
+
+    std::ifstream ifs(filepath);
+    if (ifs.fail()) {
+        std::cerr << "Can't open " << filepath << std::endl;
+        abort();
+    }
+
+    std::string str;
+    while (getline(ifs, str)) {
+        auto splited = split(str, ' ');
+        
+        auto result = JuliusResult();
+        result.from = std::stod(splited[0]) * frameShiftSize / 1000;
+        result.to = std::stod(splited[1]) * frameShiftSize + frameSize / 1000;
+        result.unit = splited[2];
+    }
+
+    return std::vector<JuliusResult>();
+};
+
+
+std::vector<std::string> split(const std::string &str, char delim) {
+    std::vector<std::string> res;
+    size_t current = 0, found;
+    while((found = str.find_first_of(delim, current)) != std::string::npos){
+        res.push_back(std::string(str, current, found - current));
+        current = found + 1;
+    }
+    res.push_back(std::string(str, current, str.size() - current));
+    return res;
+}
+
+

@@ -15,7 +15,6 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
 		int dsize = (minLength + maxLength) / 2; // 相関関数の幅（Hz）
 		int fixSize = (maxLength - minLength) / 2; // 零点修正誤差範囲（Hz）
 
-
 		int index = 0;
 		std::vector<int> indexes;
 		while (index + maxLength * 2 < inputSize) {

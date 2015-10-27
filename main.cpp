@@ -11,16 +11,18 @@
 #include "voice_wave_analyzer.h"
 #include "kmeans_method.h"
 #include "gnuplot.h"
+#include "julius_importer.h"
 
 
 std::vector<double> getInput() {
-    std::vector<double> tmp;
     Wave wav;
     if (wav.InputWave("./resources/sample.wav") != 0) {
         abort();
     }
     wav.Normalize();
-    wav.GetData(tmp);
+
+    std::vector<double> tmp;
+    wav.GetData(&tmp);
 
     int padding = 40200;
     std::vector<double> input;
@@ -35,7 +37,11 @@ std::vector<double> getInput() {
 
 int main() {
 
-    std::vector<double> input = getInput();
+    JuliusImporter juliusImporter("./resources/test_voice.lab");
+    auto results = juliusImporter.getJuliusResults();
+
+
+    auto input = getInput();
     std::cout << std::endl;
     std::cout << "入力: " << input.size() << " 個のサンプル" << std::endl << std::endl;
     
@@ -47,7 +53,7 @@ int main() {
 
     // 周期切り出し
     int padding = 10;
-    std::vector<std::vector<double> > inputCycles;
+    std::vector<std::vector<double>> inputCycles;
     for (int i = 0; i < cycles.size(); i++) {
         Cycle cycle = cycles[i];
 

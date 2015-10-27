@@ -19,6 +19,7 @@ void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option, con
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
+    fprintf(gnuplot, "unset key;");
     if (option == nullptr) {
         fprintf(gnuplot, "p \'%s\'", filename);
     }
@@ -31,30 +32,48 @@ void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option, con
 
 
 template<typename T>
-void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T> > &outputs, const char *option) {
+void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, const char *option) {
     Output2DToGnuplot(outputs, option, "output.txt");
 }
 
 template<typename T>
-void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T> > &outputs, const char *option, const char *filename) {
+void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, const char *option, const char *filename) {
     std::ofstream ofs(filename);
-    for (int i = 0; i < outputs.size(); i++) {
-        ofs << j;
-        for (int j = 0; j < outputs[i].size(); j++) {
-            ofs << " " << outputs[i][j];
+
+    int col = outputs[0].size();
+    for (int i = 0; i < col; i++) {
+        ofs << i;
+        for (int j = 0; j < outputs.size(); j++) {
+            ofs << " " << outputs[j][i];
         }
         ofs << std::endl;
     }
     ofs.close();
 
-    int col = outputs[0].size();
     FILE *gnuplot = popen("gnuplot", "w");
+    fprintf(gnuplot, "unset key;");
+    fprintf(gnuplot, "p ");
 
-    if (option == nullptr) {
-        fprintf(gnuplot, "p \'%s\'", filename);
+    if (col == 1) {
+        if (option == nullptr) {
+            fprintf(gnuplot, "\'%s\'", filename);
+        }
+        else {
+            fprintf(gnuplot, "\'%s\' %s", filename, option);
+        }
     }
     else {
-        fprintf(gnuplot, "p \'%s\' %s", filename, option);
+        for (int i = 0; i < outputs.size(); i++) {
+            if (option == nullptr) {
+                fprintf(gnuplot, "\'%s\' u 1:%d", filename, i + 2);
+            }
+            else {
+                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2, option);
+            }
+            if (i < outputs.size()-1) {
+                fprintf(gnuplot, ", ");
+            }
+        }
     }
 
     pclose(gnuplot);

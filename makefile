@@ -4,7 +4,7 @@ EXTENTION = .out
 TARGET = $(NAME)$(EXTENTION)
 
 CXX = clang++
-CXXFLAGS = -O2 -Wall
+CXXFLAGS = -O2 -Wall -std=c++11
 LDFLAGS = -lm
 LIBS = -std=c++11 -stdlib=libc++
 

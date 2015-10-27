@@ -6,12 +6,12 @@
 #include "kmeans_method.h"
 
 
-KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double> > &inputs,
+KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double>> &inputs,
         const int dim,
         const double countOfCluster) {
 
     int size = inputs.size();
-    std::vector<std::vector<double> > clusters(countOfCluster, std::vector<double>(dim, 0));
+    std::vector<std::vector<double>> clusters(countOfCluster, std::vector<double>(dim, 0));
 
     std::cout << "k-Means法を開始します。" << std::endl;
 
@@ -91,7 +91,7 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
 }
 
 
-std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double> > &inputs,
+std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs,
         const int dim,
         const double countOfCluster) {
 
