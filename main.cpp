@@ -12,11 +12,29 @@
 #include "kmeans_method.h"
 #include "gnuplot.h"
 #include "julius_importer.h"
+#include "audio.h"
 
 
-std::vector<double> getInput() {
+std::vector<std::vector<double>> normalize(std::vector<std::vector<double>> input) {
+    for (int i=0; i<input.size(); i++) {
+        double max = 0;
+        for (int j=0; j<input[i].size(); j++) {
+            double value = input[i][j];
+            if (max < fabs(value)) {
+                max = fabs(value);
+            }
+        }
+        for (int j=0; j<input[i].size(); j++) {
+            input[i][j] /= max;
+        }
+    }
+    return input;
+}
+
+
+std::vector<double> getInput(std::string path, int padding) {
     Wave wav;
-    if (wav.InputWave("./resources/sample.wav") != 0) {
+    if (wav.InputWave(path) != 0) {
         abort();
     }
     wav.Normalize();
@@ -24,26 +42,151 @@ std::vector<double> getInput() {
     std::vector<double> tmp;
     wav.GetData(&tmp);
 
-    int padding = 40200;
     std::vector<double> input;
     for (int i = padding; i < tmp.size() - padding * 2; i++) {
         input.push_back(tmp[i]);
     }
+
+    std::cout << std::endl << "input.size() ->" << input.size() << std::endl << std::endl;
     return input;
 }
 
 
+void julius() {
+    JuliusImporter juliusImporter("./resources/output.lab");
+    auto results = juliusImporter.getJuliusResults();
+
+    int samplingSize = 16000;
+    auto input = getInput("./resources/output.wav", 0);
+
+    std::vector<std::vector<double>> julius;
+    for (int i=0; i<results.size(); i++) {
+        auto result = results[i];
+        int from = result.from * samplingSize;
+        int to = result.to * samplingSize;
+        //std::cout << from << " " << to << " " << to - from << " " << result.unit << std::endl;
+        std::vector<double> vector;
+        for (int j=from; j<to; j++) {
+            vector.push_back(input[j]);
+        }
+        julius.push_back(vector);
+    }
+    //julius = normalize(julius);
+    std::cout << "julius.size() -> " << julius.size() << std::endl;
+
+
+    // 全て単一の波で置き換えてみる
+    for (int i=1; i<julius.size()-1; i++) {
+        auto result = results[i];
+        if (result.unit == "a" && i > 40) {
+            int targetSize = 140;
+            int errorSize = 40;
+            auto cycles = VoiceWaveAnalyzer::GetCycles(julius[i], samplingSize, targetSize - errorSize, targetSize + errorSize);
+            std::cout << "cycles.size() -> " << cycles.size() << std::endl;
+
+            int from = result.from * samplingSize;
+
+            auto first = cycles[0];
+            int begin = first.index;
+            auto last = cycles[cycles.size()-1];
+            int end = last.index + last.length;
+            std::cout << "begin -> " << begin << std::endl;
+            std::cout << "end -> " << end << std::endl;
+
+            std::vector<double> vector;
+            for (int j=first.index; j<first.index+first.length; j++) {
+                vector.push_back(julius[i][j]);
+            }
+            std::cout << "vector.size() -> " << vector.size() << std::endl;
+
+            for (int j=begin; j<end; j++) {
+                //input.erase(input.begin() + from + begin);
+            }
+            std::cout << "input.size() -> " << input.size() << std::endl;
+
+            for (int j=0; j<cycles.size(); j++) {
+                for (int k=0; k<vector.size(); k++) {
+                    //input.insert(input.begin() + from+begin + vector.size()*j+k, vector[k]);
+                }
+            }
+            std::cout << "input.size() -> " << input.size() << std::endl;
+
+
+            std::vector<double> gnuplot2;
+            for (int j=from+begin - 4000; j<from+begin+end + 4000; j++) {
+                gnuplot2.push_back(input[j]);
+            }
+            Gnuplot<double>::OutputToGnuplot(gnuplot2, "w l");
+
+            break;
+        }
+    }
+
+
+
+
+    Wave wav;
+    wav.CreateWave(input, samplingSize, 16);
+    wav.OutputWave("./output/input.wav");
+
+
+    std::cout << std::endl << std::endl << std::endl;
+
+    return;
+
+
+
+
+    std::vector<std::vector<double>> gnuplot;
+    for (int i=1; i<julius.size()-1; i++) {
+        auto result = results[i];
+        if (result.unit == "a" && i > 40) {
+            gnuplot.push_back(julius[i]);
+
+            int targetSize = 140;
+            int errorSize = 40;
+            auto cycles = VoiceWaveAnalyzer::GetCycles(julius[i], samplingSize, targetSize - errorSize, targetSize + errorSize);
+            std::cout << "cycles.size() -> " << cycles.size() << std::endl;
+
+            std::vector<std::vector<double>> gnuplots;
+            for (int j=0; j<cycles.size(); j++) {
+                auto cycle = cycles[j];
+                std::vector<double> vector;
+                for (int k = cycle.index; k < cycle.index + cycle.length; k++) {
+                    vector.push_back(julius[i][k]);
+                }
+                int padding = 10;
+                while (vector.size() < targetSize + padding) {
+                    vector.push_back(0);
+                }
+                gnuplots.push_back(vector);
+            }
+
+            Gnuplot<double>::Output2DToGnuplot(gnuplots, "w l lc rgb '#60FF0000'");
+
+            break;
+        }
+    }
+    Gnuplot<double>::Output2DToGnuplot(gnuplot, "w l");
+
+    /*
+    for (int i=0; i<julius.size(); i++) {
+        Wave wav;
+        wav.CreateWave(julius[i], samplingSize, 16);
+        wav.Normalize();
+        wav.OutputWave("./output/output" + std::to_string(i) + "_" + results[i].unit + ".wav");
+    }
+    */
+
+};
 
 
 int main() {
 
-    JuliusImporter juliusImporter("./resources/test_voice.lab");
-    auto results = juliusImporter.getJuliusResults();
-
-
-    auto input = getInput();
-    std::cout << std::endl;
-    std::cout << "入力: " << input.size() << " 個のサンプル" << std::endl << std::endl;
+    julius();
+    return 0;
+    
+    auto input = getInput("./resources/sample.wav", 40200);
     
     // 周期を解析
     int samplingFrequency = 44100;

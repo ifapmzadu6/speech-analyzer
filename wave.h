@@ -101,7 +101,7 @@ class Wave {
 	// Set StereoData
 	void SetData(const std::vector<double> stereoL ,const std::vector<double> stereoR );
 	// Create Mono Wave
-	void CreateWave(const std::vector<double> mono,const uint16_t samples_per_sec = WAV_DEFAULT_SPS,
+	void CreateWave(const std::vector<double> mono, const uint16_t samples_per_sec = WAV_DEFAULT_SPS,
 		const uint16_t bits_per_sample = WAV_DEFAULT_BPS);
 	// Create Stereo Wave
 	void CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, const uint16_t samples_per_sec = WAV_DEFAULT_SPS, const uint16_t bits_per_sample = WAV_DEFAULT_BPS);

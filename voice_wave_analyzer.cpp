@@ -15,18 +15,17 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
 		int dsize = (minLength + maxLength) / 2; // 相関関数の幅（Hz）
 		int fixSize = (maxLength - minLength) / 2; // 零点修正誤差範囲（Hz）
 
+        // 入力を探索し、それぞれの相関関数を求め、
+        // 最大となる（波形が似ている）箇所を探し、保存していく。
 		int index = 0;
 		std::vector<int> indexes;
-		while (index + maxLength * 2 < inputSize) {
-			// 入力を探索し、それぞれの相関関数を求め、
-			// 最大となる（波形が似ている）箇所を探し、保存していく。
-
+		while (index + maxLength + dsize < inputSize) {
 			double maxR = std::numeric_limits<double>::min();
 			double maxL = minLength;
-			// 相関関数の最大になる部分を探索
-			for (int i = minLength; i < maxLength; i++) {
+			// 相関関数が最大になる部分を探索
+			for (int i=minLength; i<maxLength; i++) {
 				double r = 0;
-				for (int j = 0; j < dsize; j++) {
+				for (int j=0; j<dsize; j++) {
 					r += input[index + j] * input[index + j + i];
 				}
 				if (r > maxR) {
@@ -43,30 +42,32 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
 
 		// indexesの零点を修正
 		std::vector<int> fixedIndexes;
-		for (int i = 0; i < indexes.size(); i++) {
+		for (int i=0; i<indexes.size(); i++) {
 			int index = indexes[i];
-
-			for (int j = 0; j < fixSize; j++) {
-                // indexの前後を調べ、符号が逆になる箇所を探す
-
-				if ((index + j + 1 < inputSize)
-					&& (input[index + j] * input[index + j + 1] <= 0)) {
+            // indexの前後を調べ、符号が逆になる箇所を探す
+			for (int j=0; j<fixSize; j++) {
+				if ((index + j + 1 < inputSize) && (input[index + j] * input[index + j + 1] <= 0)) {
 					fixedIndexes.push_back(index + j);
 					break;
 				}
-				else if ((index - j - 1 > 0)
-					&& (input[index - j - 1] * input[index - j] <= 0)) {
+				else if ((index - j - 1 > 0) && (input[index - j - 1] * input[index - j] <= 0)) {
 					fixedIndexes.push_back(index - j - 1);
 					break;
 				}
 			}
 		}
 
-		std::cout << "零点検出率 : " << 100.0 * fixedIndexes.size() / indexes.size() << "%" << std::endl;
+        if (fixedIndexes.size() > 0 && indexes.size() > 0) {
+            std::cout << "零点検出率 : " << 100.0 * fixedIndexes.size() / indexes.size() << "%" << std::endl;
+        }
+        else {
+            std::cout << "検出なし" << std::endl; 
+            abort();
+        }
 
         std::vector<Cycle> cycles;
-        for (int i = 0; i < fixedIndexes.size() - 1; i++) {
-            int length = fixedIndexes[i + 1] - fixedIndexes[i];
+        for (int i=0; i<fixedIndexes.size()-1; i++) {
+            int length = fixedIndexes[i+1] - fixedIndexes[i];
             if ((length > minLength) && (length < maxLength)) {
                 Cycle cycle;
                 cycle.index = fixedIndexes[i];

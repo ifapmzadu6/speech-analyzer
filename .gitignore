@@ -30,4 +30,7 @@
 # Output files
 output*
 
+# Mac
+.DS_Store
+
 

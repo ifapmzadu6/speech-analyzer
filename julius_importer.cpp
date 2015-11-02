@@ -12,17 +12,20 @@ std::vector<JuliusResult> JuliusImporter::getJuliusResults() {
         abort();
     }
 
+    std::vector<JuliusResult> results;
     std::string str;
     while (getline(ifs, str)) {
         auto splited = split(str, ' ');
         
         auto result = JuliusResult();
-        result.from = std::stod(splited[0]) * frameShiftSize / 1000;
-        result.to = std::stod(splited[1]) * frameShiftSize + frameSize / 1000;
+        result.from = std::stod(splited[0]);
+        result.to = std::stod(splited[1]);
         result.unit = splited[2];
+
+        results.push_back(result);
     }
 
-    return std::vector<JuliusResult>();
+    return results;
 };
 
 

@@ -1,13 +1,9 @@
-
-#include "Wave.h"
-
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
 #include <fstream>
 
-
-
+#include "Wave.h"
 
 
 Wave::Wave() {
@@ -48,7 +44,7 @@ int Wave::WavHdrRead() {
 	std::ifstream fin;
     long cursor, len;
 	
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 	if( !fin ) {
 	    std::cerr << "ファイルを開けませんでした." << std::endl;
 		return -1;
@@ -76,7 +72,7 @@ int Wave::WavHdrRead() {
 
     // チャンク情報
 	while( !fin.eof() ) {
-		fin.read((char*)&chunk,sizeof(chunk));
+		fin.read((char*)&chunk, sizeof(chunk));
 		if( fin.bad() ) {
 			std::cerr << "読み込みエラー" << std::endl;
 			exit( 0 );
@@ -116,12 +112,10 @@ const int Wave::ReadfmtChunk(std::ifstream* fin) {
 	}
 
 	std::cout << " WAVEファイルの内容" << std::endl;
-    std::cout << "             データ形式: " << wavfmtpcm.formatTag		<< " (1 = PCM)"		<< std::endl;
-    std::cout << "           チャンネル数: " << wavfmtpcm.channels		<< "[channel]"		<< std::endl;
-    std::cout << "     サンプリング周波数: " << wavfmtpcm.samplesPerSec	<< "[Hz]"			<< std::endl;
-    std::cout << "          バイト数 / 秒: " << wavfmtpcm.bytesPerSec	<< "[bytes/sec]"	<< std::endl;
-    std::cout << " バイト数×チャンネル数: " << wavfmtpcm.blockAlign	<< "[bytes]"		<< std::endl;
-    std::cout << "    ビット数 / サンプル: " << wavfmtpcm.bitsPerSample	<< "[bits/sample]"	<< std::endl;
+    std::cout << "    formatTag: " << wavfmtpcm.formatTag << " (1 = PCM)" << std::endl;
+    std::cout << "    channels: " << wavfmtpcm.channels << "[channel]" << std::endl;
+    std::cout << "    samplesPerSec: " << wavfmtpcm.samplesPerSec << "[Hz]"	<< std::endl;
+    std::cout << "    bitsPerSample: " << wavfmtpcm.bitsPerSample << "[bits/sample]" << std::endl;
 
     if(wavfmtpcm.formatTag != 1) {
 		std::cerr << "\nこのプログラムは無圧縮PCMのみを対象とします." << std::endl;
@@ -179,7 +173,7 @@ int Wave::Dump8BitStereoWave() {
     char l,r;
 	std::ifstream fin;
 
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 
 	fin.seekg( posOfData,std::ios::beg); //元ファイルのデータ開始部分へ
 
@@ -201,7 +195,7 @@ int Wave::Dump8BitMonoWave() {
 	char m;
 	std::ifstream fin;
 
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 
 	fin.seekg( posOfData,std::ios::beg); //元ファイルのデータ開始部分へ
 
@@ -220,7 +214,7 @@ int Wave::Dump16BitStereoWave() {
 	short l,r;
 	std::ifstream fin;
 
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 
 	fin.seekg( posOfData,std::ios::beg); //元ファイルのデータ開始部分へ
 
@@ -242,7 +236,7 @@ int Wave::Dump16BitMonoWave() {
 	short m;
 	std::ifstream fin;
 
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 
 	fin.seekg( posOfData,std::ios::beg); //元ファイルのデータ開始部分へ
 
@@ -262,7 +256,7 @@ int Wave::Dump24BitStereoWave() {
     int l,r;
 	std::ifstream fin;
 
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 
 	fin.seekg( posOfData,std::ios::beg); //元ファイルのデータ開始部分へ
 
@@ -284,7 +278,7 @@ int Wave::Dump24BitMonoWave() {
 	int m;
 	std::ifstream fin;
 
-	fin.open(wavename,std::ios::binary);
+	fin.open(wavename, std::ios::binary);
 
 	fin.seekg( posOfData,std::ios::beg); //元ファイルのデータ開始部分へ
 
@@ -402,8 +396,7 @@ void Wave::OutputWave(const std::string app) {
 	}
 	else {
 		int max;
-		int mono,stereoL,stereoR;
-		std::string outname;
+		int mono, stereoL, stereoR;
 		std::ofstream fout;
 
 		if (wavfhdr.wavfmt.bitsPerSample == 8) {
@@ -419,19 +412,18 @@ void Wave::OutputWave(const std::string app) {
 			std::cerr << "error:bits per sample" << std::endl;
 		}
 
-		outname = wavename;
-		outname.insert(outname.size()-4, app);
-
-		fout.open(outname,std::ios::binary);
+		fout.open(app, std::ios::binary);
 
 		// wav ヘッダ書き込み
-		fout.write( (char*) &wavfhdr,sizeof(tagWaveFileHeader) );
+		fout.write( (char*) &wavfhdr, sizeof(tagWaveFileHeader) );
 
 		if (wavfhdr.wavfmt.channels == 1) {
 			for (unsigned int i=0; i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign ; i++) {
 				mono = (monodata[i]) * max;
 				if (mono >= max)
 					mono = max-1;
+                if (mono <= -max)
+                    mono = -max+1;
 				fout.write( (char*) &mono, sizeof(char) * ( wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels ) );
 			}
 		}
@@ -439,13 +431,17 @@ void Wave::OutputWave(const std::string app) {
 			for (unsigned int i=0; i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign ; i++) {
 				stereoL= ldata[i] * max;
 				stereoR= rdata[i] * max;
-				if(stereoL >= max)
+				if (stereoL >= max)
 					stereoL = max-1;
-				if(stereoR >= max)
+                if (stereoL <= -max)
+                    stereoL = -max+1;
+				if (stereoR >= max)
 					stereoR = max-1;
+                if (stereoR <= -max)
+                    stereoR = -max+1;
 
-				fout.write( (char*) &stereoL,sizeof(char) * ( wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels ) );
-				fout.write( (char*) &stereoR,sizeof(char) * ( wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels ) );
+				fout.write( (char*) &stereoL, sizeof(char) * ( wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels ) );
+				fout.write( (char*) &stereoR, sizeof(char) * ( wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels ) );
 			}
 		}
 	}
@@ -648,97 +644,4 @@ void Wave::ResamplingSinc(const uint16_t resampling,const int sincLengthHarf) {
 	}
 }
 
-/*
-std::vector<int> Wave::GetFreqFluc()
-{
-	if(channels == 1)
-	{
-		std::cout << "DFF" << std::endl;
-		std::vector<double> temp_x,temp_y,r;
-		std::vector<int> index,fixindex;
-		std::vector<int> freqfluc;
-		int offset;
-		int pmin,pmax,p;
-		int n,m;
-		double max;
-		int detect_size = 100;
 
-		offset = 0;
-
-		temp_x.resize( (int)(samplesPerSec * 0.007) );
-		temp_y.resize( temp_x.size() );
-		
-		pmin = (int)(samplesPerSec * 0.005);
-		pmax = (int)(samplesPerSec * 0.010);
-
-		r.resize(pmax+1);
-
-		while( offset + pmax * 2 < monodata.size() )
-		{
-			for(n=0;n<temp_x.size();n++)
-			{
-				temp_x[n] = monodata[offset + n];
-			}
-			max = 0.0;
-			p=pmin;
-			for(m=pmin;m<=pmax;m++)
-			{
-				for(n=0;n<temp_x.size();n++)
-				{
-					temp_y[n] = monodata[offset+m+n];
-				}
-				r[m]=0.0;
-				for(n=0;n<temp_x.size();n++)
-				{
-					r[m]+=temp_x[n]*temp_y[n];
-				}
-				if(r[m]>max)
-				{
-					max=r[m];
-					p=m;
-				}
-			}
-			index.push_back(offset);
-			offset += p;
-		}
-		offset = 0.0;
-		
-		for( n=0;n<index.size();n++)
-		{
-			for(m=0;m<detect_size;m++)
-			{
-				if(index[n]+m+1 < monodata.size())
-				{
-					if(monodata[index[n]+m] * monodata[index[n]+m+1] <= 0.0)
-					{
-						fixindex.push_back(index[n]+m);
-						break;
-					}
-				}
-				if(index[n]-m-1 > 0)
-				{
-					if(monodata[index[n]-m] * monodata[index[n]-m-1] <= 0.0)
-					{
-						fixindex.push_back(index[n]-m-1);
-						break;
-					}
-				}
-
-			}
-		}
-//		fixindex=index;
-		for( n=0;n<fixindex.size()-1;n++ )
-		{
-			freqfluc.push_back(fixindex[n+1]-fixindex[n]);
-		}
-		return fixindex;
-	}
-	else
-	{
-		std::cerr << "Only Monoral. before Stereo to Mono." << std::endl;
-	}
-}
-
-void Wave::OutputText()
-{}
-*/
