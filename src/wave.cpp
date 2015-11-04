@@ -111,7 +111,6 @@ const int Wave::ReadfmtChunk(std::ifstream* fin) {
 		exit( 0 );
 	}
 
-	std::cout << " WAVEファイルの内容" << std::endl;
     std::cout << "    formatTag: " << wavfmtpcm.formatTag << " (1 = PCM)" << std::endl;
     std::cout << "    channels: " << wavfmtpcm.channels << "[channel]" << std::endl;
     std::cout << "    samplesPerSec: " << wavfmtpcm.samplesPerSec << "[Hz]"	<< std::endl;

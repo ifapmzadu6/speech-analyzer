@@ -12,15 +12,15 @@ class KMeansMethod {
 public:
 
     static KMeansMethodResult Clustering(const std::vector<std::vector<double>> &inputs,
-            const int dim,
-            const double countOfCluster);
+            int dim,
+            int countOfCluster);
 
 
 private:
 
     static std::vector<int> getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs,
             const int dim,
-            const double countOfCluster);
+            const int countOfCluster);
 
 };
 

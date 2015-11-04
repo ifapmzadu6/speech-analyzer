@@ -4,11 +4,11 @@
 
 std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
 		const std::vector<double> &input,
-		const int samplingFrequency,
-		const int minLength,
-		const int maxLength
+		int samplingFrequency,
+		int minLength,
+		int maxLength
 		) {
-		std::cout << "音声の周期切り出しを行います。" << std::endl;
+		std::cout << "- Cycles -" << std::endl;
 
         int inputSize = input.size(); // 入力のサンプル数
 
@@ -58,10 +58,10 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
 		}
 
         if (fixedIndexes.size() > 0 && indexes.size() > 0) {
-            std::cout << "零点検出率 : " << 100.0 * fixedIndexes.size() / indexes.size() << "%" << std::endl;
+            std::cout << "zero detection rate: " << 100.0 * fixedIndexes.size() / indexes.size() << "%" << std::endl;
         }
         else {
-            std::cout << "検出なし" << std::endl; 
+            std::cout << "no results" << std::endl; 
             abort();
         }
 
@@ -76,9 +76,7 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
                 cycles.push_back(cycle);
             }
         }
-
-        std::cout << "範囲外率 : " << 100.0 * cycles.size() / fixedIndexes.size() << "%" << std::endl;
-        std::cout << "周期 : " << cycles.size() << "個" << std::endl << std::endl;
+        std::cout << "correct data rate : " << 100.0 * cycles.size() / fixedIndexes.size() << "%" << std::endl;
 
 		return cycles;
 	}

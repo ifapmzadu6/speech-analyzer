@@ -7,20 +7,21 @@
 
 
 KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double>> &inputs,
-        const int dim,
-        const double countOfCluster) {
+        int dim,
+        int countOfCluster) {
 
     int size = inputs.size();
     std::vector<std::vector<double>> clusters(countOfCluster, std::vector<double>(dim, 0));
 
-    std::cout << "k-Means法を開始します。" << std::endl;
+    std::cout << "- Clustering -" << std::endl;
 
     // kMeans法++で初期値を決定
     std::vector<int> clusterOfInputs = getInitialClusterOfInputs(inputs, dim, countOfCluster);
+    std::cout << "initialized" << std::endl;
 
     while (true) {
         // 各クラスタの中心を求める
-        for (int i = countOfCluster-1; i >= 0; i--) {
+        for (int i = 0; i < countOfCluster; i++) {
             std::vector<double> center(dim, 0);
             int count = 0;
             // i番目のクラスタに含まれている入力を検索
@@ -46,6 +47,7 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
                 }
             }
         }
+
 
         bool isChanged = false;
 
@@ -82,7 +84,25 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
 
     }
 
-    std::cout << clusters.size() << " 個のクラスに分類されました。" << std::endl << std::endl;
+    // 一つも属されていないクラスタを削除する
+    for (int i = countOfCluster-1; i >= 0; i--) {
+        int count = 0;
+        for (int j = 0; j < size; j++) {
+            if (clusterOfInputs[j] == i) {
+                count++;
+            }
+        }
+        if (count == 0) {
+            clusters.erase(clusters.begin() + i);
+            for (int j = 0; j < size; j++) {
+                if (clusterOfInputs[j] > i) {
+                    clusterOfInputs[j] -= 1;
+                }
+            }
+        }
+    }
+
+    std::cout << "clusters.size() -> " << clusters.size() << std::endl;
 
     KMeansMethodResult result;
     result.clusters = clusters;
@@ -93,7 +113,7 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
 
 std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs,
         const int dim,
-        const double countOfCluster) {
+        const int countOfCluster) {
 
     // メルセンヌツイスタの初期化
     std::random_device random_device;
@@ -101,7 +121,7 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
 
     std::vector<int> indexOfCluster;
     // まず最初に乱数で一つだけ追加
-    std::uniform_int_distribution<int> score(0, inputs.size());
+    std::uniform_int_distribution<int> score(0, inputs.size()-1);
     indexOfCluster.push_back(score(mt));
 
     while (indexOfCluster.size() < countOfCluster) {
@@ -158,7 +178,6 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
     }
 
     std::vector<int> clusterOfInputs;
-
     // 入力をそれぞれ一番近いクラスタに付与
     for (int i = 0; i < inputs.size(); i++) {
         std::vector<double> input = inputs[i];
@@ -180,7 +199,6 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
         }
         clusterOfInputs.push_back(minIndex);
     }
-
     return clusterOfInputs;
 }
 

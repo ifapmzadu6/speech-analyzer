@@ -31,9 +31,9 @@ class VoiceWaveAnalyzer {
 	 */
 	static std::vector<Cycle> GetCycles(
 		const std::vector<double> &input,
-		const int samplingFrequency,
-		const int minLength,
-		const int maxLength
+		int samplingFrequency,
+		int minLength,
+		int maxLength
 		);
 
 };
