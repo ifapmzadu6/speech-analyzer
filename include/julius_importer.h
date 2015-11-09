@@ -26,5 +26,7 @@ private:
     static const int frameSize = 400;
     static const int frameShiftSize = 160;
 
+    std::vector<std::string> split(const std::string &str, char delim);
+
 };
 

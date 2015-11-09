@@ -11,6 +11,7 @@
 #include "gnuplot.h"
 #include "julius_importer.h"
 #include "audio.h"
+#include "linear_interpolation.h"
 
 
 // Input
@@ -20,7 +21,6 @@ std::vector<double> copyVector(std::vector<double> &input, int begin, int length
 
 // Julius
 std::vector<std::vector<double>> getSplittedDataByJulius(std::vector<double> &input, int samplingSize, std::vector<JuliusResult> &juliusResults);
-void juliusProcess(std::vector<double> &input, int samplingSize, std::vector<std::vector<double>> &julius, std::vector<JuliusResult> &results);
 void enumurateJulius(std::vector<double> &input, int samplingSize, int from, std::vector<double> &julius);
 
 // Clustering
@@ -33,13 +33,35 @@ int main() {
     //auto input = getInput("./resource/a.wav", 15000);
     //showClustering(input, samplingSize);
 
-
-    auto inputForJulius = getInput("./resource/output.wav", 0);
-    JuliusImporter juliusImporter("./resource/output.lab");
+    auto inputForJulius = getInput("./resource/nomura.wav", 0);
+    JuliusImporter juliusImporter("./resource/nomura.lab");
     auto juliusResults = juliusImporter.getJuliusResults();
     auto splittedDataByJulius = getSplittedDataByJulius(inputForJulius, samplingSize, juliusResults);
 
-    juliusProcess(inputForJulius, samplingSize, splittedDataByJulius, juliusResults);
+    int count = 0;
+    for (int i=0; i<juliusResults.size()-1; i++) {
+        auto result = juliusResults[i];
+
+        if ((
+                    (result.unit == "a") ||
+                    (result.unit == "i") ||
+                    (result.unit == "u") ||
+                    (result.unit == "e") ||
+                    (result.unit == "o")
+            ) && count < 100) {
+
+            int from = result.from * samplingSize;
+            enumurateJulius(inputForJulius, samplingSize, from, splittedDataByJulius[i]);
+            //showClustering(splittedDataByJulius[i], samplingSize);
+
+            count++;
+            //break;
+        }
+    }
+
+    Wave wav;
+    wav.CreateWave(inputForJulius, samplingSize, 16);
+    wav.OutputWave("./output/input.wav");
 
     return 0;
 }
@@ -47,21 +69,21 @@ int main() {
 
 
 
-
-// Input
 std::vector<double> getInput(std::string path, int padding) {
     std::cout << "- \"" + path +  "\" -" << std::endl;
     Wave wav;
-    if (wav.InputWave(path) != 0)
+    if (wav.InputWave(path) != 0) {
         abort();
+    }
     wav.Normalize();
 
     std::vector<double> tmp;
     wav.GetData(&tmp);
 
     std::vector<double> input;
-    for (int i = padding; i < tmp.size() - padding * 2; i++) 
+    for (int i = padding; i < tmp.size() - padding * 2; i++) {
         input.push_back(tmp[i]);
+    }
     std::cout << std::endl << "input.size() ->" << input.size() << std::endl << std::endl;
     return input;
 }
@@ -71,18 +93,22 @@ std::vector<std::vector<double>> normalizeVector(std::vector<std::vector<double>
         double max = 0;
         for (int j=0; j<input[i].size(); j++) {
             double value = input[i][j];
-            if (max < fabs(value))
+            if (max < fabs(value)) {
                 max = fabs(value);
+            }
         }
-        for (int j=0; j<input[i].size(); j++)
+        for (int j=0; j<input[i].size(); j++) {
             input[i][j] /= max;
+        }
     }
     return input;
 }
 
 std::vector<double> copyVector(std::vector<double> &input, int begin, int length) {
     std::vector<double> vector;
-    for (int j=0; j<length; j++) vector.push_back(input[begin+j]);
+    for (int j=0; j<length; j++) {
+        vector.push_back(input[begin+j]);
+    }
     return vector;
 }
 
@@ -102,14 +128,21 @@ void showClustering(std::vector<double> &input, int samplingSize) {
     std::vector<std::vector<double>> inputCycles;
     for (int i = 0; i < cycles.size(); i++) {
         Cycle cycle = cycles[i];
+       
+       //auto vector = 
 
         std::vector<double> inputCycle;
-        for (int j = 0; j < cycle.length; j++)
+        for (int j = 0; j < cycle.length; j++) {
             inputCycle.push_back(input[cycle.index + j]);
+        }
 
         // 足りない分を0で埋める
-        while (inputCycle.size() < targetSize + padding) 
-            inputCycle.push_back(0);
+        //while (inputCycle.size() < targetSize + padding) inputCycle.push_back(0);
+        //
+
+        // 波形の長さを揃える
+        //int maxLength = -1;
+        //for (int j=0; j<
 
         inputCycles.push_back(inputCycle);
     }
@@ -133,8 +166,9 @@ void showClustering(std::vector<double> &input, int samplingSize) {
 
         // 二乗誤差を算出
         double error = 0;
-        for (int j = 0; j < dim; j++) 
+        for (int j = 0; j < dim; j++) {
             error += fabs(inputCycles[i][j] - minCluster[j]) / 2.0;
+        }
 
         errors.push_back(error);
     }
@@ -147,8 +181,9 @@ void showClustering(std::vector<double> &input, int samplingSize) {
     std::vector<double> energy;
     for (int i = 0; i < inputCycles.size(); i++) {
         double e = 0;
-        for (int j = 0; j < inputCycles[i].size(); j++)
+        for (int j = 0; j < inputCycles[i].size(); j++) {
             e += fabs(inputCycles[i][j]);
+        }
         energy.push_back(e);
     }
     Gnuplot<double>::OutputToGnuplot(energy, "w l");
@@ -165,84 +200,82 @@ std::vector<std::vector<double>> getSplittedDataByJulius(std::vector<double> &in
         int to = juliusResults[i].to * samplingSize;
         //std::cout << from << " " << to << " " << to - from << " " << result.unit << std::endl;
         std::vector<double> vector;
-        for (int j=from; j<to; j++)
+        for (int j=from; j<to; j++) {
             vector.push_back(input[j]);
+        }
         splitted.push_back(vector);
     }
     return splitted;
 }
 
 
-void juliusProcess(std::vector<double> &input, int samplingSize, std::vector<std::vector<double>> &julius, std::vector<JuliusResult> &results) {
-    for (int i=1; i<julius.size()-1; i++) {
-        auto result = results[i];
-        if (result.unit == "a" && i > 40) {
-
-            //int from = result.from * samplingSize;
-            //enumurateJulius(input, samplingSize, from, julius[i]);
-            showClustering(julius[i], samplingSize);
-
-            break;
-        }
-    }
-
-    Wave wav;
-    wav.CreateWave(input, samplingSize, 16);
-    wav.OutputWave("./output/input.wav");
-}
-
 void enumurateJulius(std::vector<double> &input, int samplingSize, int from, std::vector<double> &julius) {
     int targetSize = 140;
-    int errorSize = 40;
+    int errorSize = 50;
     auto cycles = VoiceWaveAnalyzer::GetCycles(julius, samplingSize, targetSize-errorSize, targetSize+errorSize);
+    if (cycles.size() <= 2) {
+        return;
+    }
     std::cout << "cycles.size() -> " << cycles.size() << std::endl;
 
-    int begin = cycles[0].index;
-    int end = cycles[cycles.size()-1].index + cycles[cycles.size()-1].length;
-    std::cout << "begin -> " << begin << std::endl;
-    std::cout << "end -> " << end << std::endl;
-
-    auto vector = copyVector(julius, cycles[0].index, cycles[0].length);
-    std::cout << "vector.size() -> " << vector.size() << std::endl;
-
-    std::vector<double> maxDs;
-    // 一時的に最大値を求めてみる
-    for(int j=0; j<cycles.size(); j++) {
-        double max = -1;
-        double min = 1;
-        double d = 0;
-        for (int k=0; k<cycles[j].length; k++) {
-            double value = julius[ cycles[j].index + k ];
-            if (value > max) max = value;
-            if (value < min) min = value;
-            if (fabs(value) > d) d = fabs(value);
-        }
-        maxDs.push_back(d);
-        //std::cout << "max -> " << max << ", min -> " << min << std::endl;
+    if (cycles.size() < 5) {
+        return;
     }
 
-    double max = 0;
-    for (int j=0; j<maxDs.size(); j++) 
-        if (maxDs[j] > max) max = maxDs[j];
+    std::vector<double> amps, tops;
+    // 先頭の波を利用する
+    auto defaultCycle = cycles[3];
+    auto defaultWave = copyVector(julius, defaultCycle.index, defaultCycle.length);
+    double defaultMax = -1;
+    double defaultMin = 1;
+    for (int k=0; k<defaultWave.size(); k++) {
+        double value = defaultWave[k];
+        if (value > defaultMax) {
+            defaultMax = value;
+        }
+        if (value < defaultMin) {
+            defaultMin = value;
+        }
+    }
+    double defaultAmp = fabs(defaultMax-defaultMin);
 
-    std::vector<double> rates;
-    for (int j=0; j<maxDs.size(); j++)
-        rates.push_back(maxDs[j] / max);
-    Gnuplot<double>::OutputToGnuplot(rates, "w l");
+    for(int i=0; i<cycles.size(); i++) {
+        double max = -1, min = 1;
+        for (int k=0; k<cycles[i].length; k++) {
+            double value = julius[ cycles[i].index + k ];
+            if (value > max) {
+                max = value;
+            }
+            if (value < min) {
+                min = value;
+            }
+        }
+        double amp = fabs(max-min);
 
-    for (int j=begin; j<end; j++) 
-        input.erase(input.begin() + from + begin);
-    std::cout << "input.size() -> " << input.size() << std::endl;
+        // 入力の書き換え
+        for (int j=0; j<cycles[i].length; j++) {
+            input.erase(input.begin() + from + cycles[i].index);
+        }
+        //std::cout << "input.size() -> " << input.size() << std::endl;
+
+        auto wave = LinearInterpolation::convert(defaultWave, cycles[i].length);
+        double rate = amp / defaultAmp;
+        double diff = max - defaultMax;
+        for (int k=0; k<cycles[i].length; k++) {
+            int index = from + cycles[i].index + k;
+            input.insert(input.begin() + index, wave[k] * rate - diff);
+        }
+        //std::cout << "input.size() -> " << input.size() << std::endl;
+    }
+
     
-    for (int j=0; j<cycles.size(); j++)
-        for (int k=0; k<vector.size(); k++)
-            input.insert(input.begin() + from+begin + vector.size()*j+k, vector[k] * rates[j]);
-    std::cout << "input.size() -> " << input.size() << std::endl;
-
-
+    // 波形の表示
     std::vector<double> gnuplot2;
-    for (int j=-3000; j<end+3000; j++)
-        gnuplot2.push_back(input[from+begin+j]);
+    int padding = 2000;
+    for (int j=0; j<julius.size()+padding*2; j++) {
+        gnuplot2.push_back( input[from+j-padding] );
+    }
     Gnuplot<double>::OutputToGnuplot(gnuplot2, "w l");
+
 }
 
