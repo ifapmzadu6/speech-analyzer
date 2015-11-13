@@ -4,12 +4,12 @@
 
 
 template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option) {
-    OutputToGnuplot(output, option, "./tmp/output.txt");
+void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, std::string title, const char *option) {
+    OutputToGnuplot(output, title, option, "./tmp/output.txt");
 }
 
 template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option, const char *filename) {
+void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, std::string title, const char *option, const char *filename) {
     std::ofstream ofs(filename);
     for (int i = 0; i < output.size(); i++) {
         ofs << i << " " << output[i] << std::endl;
@@ -17,6 +17,8 @@ void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option, con
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
+    //fprintf(gnuplot, "set title \"%s\";", title);
+    fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
     if (option == nullptr) {
         fprintf(gnuplot, "p \'%s\'", filename);
@@ -30,12 +32,12 @@ void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, const char *option, con
 
 
 template<typename T>
-void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, const char *option) {
-    Output2DToGnuplot(outputs, option, "./tmp/output.txt");
+void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::string title, const char *option) {
+    Output2DToGnuplot(outputs, title, option, "./tmp/output.txt");
 }
 
 template<typename T>
-void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, const char *option, const char *filename) {
+void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::string title, const char *option, const char *filename) {
     std::ofstream ofs(filename);
 
     int maxCol = 0;
@@ -57,6 +59,8 @@ void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, const 
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
+    //fprintf(gnuplot, "set title \"%s\";", title);
+    fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
     fprintf(gnuplot, "p ");
 

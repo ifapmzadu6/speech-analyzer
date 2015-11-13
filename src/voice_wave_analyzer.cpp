@@ -62,7 +62,7 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
         }
         else {
             std::cout << "no results" << std::endl; 
-            abort();
+            return std::vector<Cycle>();
         }
 
         std::vector<Cycle> cycles;

@@ -6,9 +6,7 @@
 #include "kmeans_method.h"
 
 
-KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double>> &inputs,
-        int dim,
-        int countOfCluster) {
+KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double>> &inputs, int dim, int countOfCluster) {
 
     int size = inputs.size();
     std::vector<std::vector<double>> clusters(countOfCluster, std::vector<double>(dim, 0));
@@ -111,10 +109,7 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
 }
 
 
-std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs,
-        const int dim,
-        const int countOfCluster) {
-
+std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs, int dim, int countOfCluster) {
     // メルセンヌツイスタの初期化
     std::random_device random_device;
     std::mt19937 mt(random_device());
@@ -125,7 +120,6 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
     indexOfCluster.push_back(score(mt));
 
     while (indexOfCluster.size() < countOfCluster) {
-
         std::vector<double> distances;
         for (int i = 0; i < inputs.size(); i++) {
             std::vector<double> input = inputs[i];
