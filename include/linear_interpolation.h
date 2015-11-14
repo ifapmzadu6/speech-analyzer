@@ -4,9 +4,5 @@
 
 class LinearInterpolation {
 public:
-
-    static std::vector<double> convert(std::vector<double> &input, int toCycle);
-
+    static std::vector<double> convert(std::vector<double>& input, int toCycle);
 };
-
-

@@ -2,22 +2,20 @@
 #include <vector>
 #include <string>
 
-
 struct JuliusResult {
     double from;
     double to;
     std::string unit;
 };
 
-
 class JuliusImporter {
 public:
-
     std::string filepath;
 
     JuliusImporter() { abort(); };
 
-    JuliusImporter(std::string filepath) : filepath(filepath) {};
+    JuliusImporter(std::string filepath)
+        : filepath(filepath){};
 
     std::vector<JuliusResult> getJuliusResults();
 
@@ -26,7 +24,5 @@ private:
     static const int frameSize = 400;
     static const int frameShiftSize = 160;
 
-    std::vector<std::string> split(const std::string &str, char delim);
-
+    std::vector<std::string> split(const std::string& str, char delim);
 };
-

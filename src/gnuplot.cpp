@@ -2,21 +2,22 @@
 
 #include "gnuplot.h"
 
-
-template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, std::string title, const char *option) {
+template <typename T>
+void Gnuplot<T>::OutputToGnuplot(std::vector<T>& output, std::string title, const char* option)
+{
     OutputToGnuplot(output, title, option, "./tmp/output.txt");
 }
 
-template<typename T>
-void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, std::string title, const char *option, const char *filename) {
+template <typename T>
+void Gnuplot<T>::OutputToGnuplot(std::vector<T>& output, std::string title, const char* option, const char* filename)
+{
     std::ofstream ofs(filename);
     for (int i = 0; i < output.size(); i++) {
         ofs << i << " " << output[i] << std::endl;
     }
     ofs.close();
 
-    FILE *gnuplot = popen("gnuplot", "w");
+    FILE* gnuplot = popen("gnuplot", "w");
     //fprintf(gnuplot, "set title \"%s\";", title);
     fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
@@ -29,19 +30,19 @@ void Gnuplot<T>::OutputToGnuplot(std::vector<T> &output, std::string title, cons
     pclose(gnuplot);
 }
 
-
-
-template<typename T>
-void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::string title, const char *option) {
+template <typename T>
+void Gnuplot<T>::Output2DToGnuplot(std::vector<std::vector<T> >& outputs, std::string title, const char* option)
+{
     Output2DToGnuplot(outputs, title, option, "./tmp/output.txt");
 }
 
-template<typename T>
-void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::string title, const char *option, const char *filename) {
+template <typename T>
+void Gnuplot<T>::Output2DToGnuplot(std::vector<std::vector<T> >& outputs, std::string title, const char* option, const char* filename)
+{
     std::ofstream ofs(filename);
 
     int maxCol = 0;
-    for (int i=0; i<outputs.size(); i++) {
+    for (int i = 0; i < outputs.size(); i++) {
         if (maxCol < outputs[i].size()) {
             maxCol = outputs[i].size();
         }
@@ -58,7 +59,7 @@ void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::s
     }
     ofs.close();
 
-    FILE *gnuplot = popen("gnuplot", "w");
+    FILE* gnuplot = popen("gnuplot", "w");
     //fprintf(gnuplot, "set title \"%s\";", title);
     fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
@@ -80,7 +81,7 @@ void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::s
             else {
                 fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2, option);
             }
-            if (i < outputs.size()-1) {
+            if (i < outputs.size() - 1) {
                 fprintf(gnuplot, ", ");
             }
         }
@@ -88,4 +89,3 @@ void Gnuplot<T>::Output2DToGnuplot(std::vector< std::vector<T>> &outputs, std::s
 
     pclose(gnuplot);
 }
-

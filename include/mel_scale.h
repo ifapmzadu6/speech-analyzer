@@ -22,110 +22,112 @@ struct MelFilterBank {
 
 class MelScale {
 public:
-    
     // Stevens & Volkman 1940; Beranek 1949; O’Shaughnessy 1987
-    static double hz2mel_stevens(double f) {
-        return 1127.010480 * log(f/700.0 + 1.0);
+    static double hz2mel_stevens(double f)
+    {
+        return 1127.010480 * log(f / 700.0 + 1.0);
     }
-    
-    static double mel2hz_stevens(double mel) {
-        return 700.0 * (exp(mel/1127.010480) - 1.0);
+
+    static double mel2hz_stevens(double mel)
+    {
+        return 700.0 * (exp(mel / 1127.010480) - 1.0);
     }
-    
-    
+
     // Fant 1968
-    static double hz2mel_fant(double f) {
-        return 1442.695041 * log(f/1000.0 + 1.0);
+    static double hz2mel_fant(double f)
+    {
+        return 1442.695041 * log(f / 1000.0 + 1.0);
     }
-    
-    static double mel2hz_fant(double mel) {
-        return 1000.0 * (exp(mel/1442.695041) - 1.0);
+
+    static double mel2hz_fant(double mel)
+    {
+        return 1000.0 * (exp(mel / 1442.695041) - 1.0);
     }
-    
-    
+
     // Lindsay & Norman 1977
-    static double hz2mel_lindsay(double f) {
-        return 1046.55994 * log(f/625.0 + 1.0);
+    static double hz2mel_lindsay(double f)
+    {
+        return 1046.55994 * log(f / 625.0 + 1.0);
     }
-    
-    static double mel2hz_lindsay(double mel) {
-        return 625.0 * (exp(mel/1046.55994) - 1.0);
+
+    static double mel2hz_lindsay(double mel)
+    {
+        return 625.0 * (exp(mel / 1046.55994) - 1.0);
     }
-    
-    
-    
+
     /**
      * メルフィルタバンクを作成
      */
-    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft, int numChannels) {
-        
+    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft, int numChannels)
+    {
+
         // ナイキスト周波数
         double fmax = fs / 2;
-        
+
         // ナイキスト周波数
         double melmax = hz2mel_fant(fmax);
-        
+
         // 周波数インデックスの最大値
         double nmax = nfft / 2;
-        
+
         // 周波数解像度（周波数インデックス1あたりのHz幅）
         double df = fs / nfft;
-        
+
         // 各フィルタの中心周波数をお揉める
         double dmel = melmax / (numChannels + 1);
         std::vector<double> melCenters;
-        for (int i=1; i<numChannels+1; i++) {
+        for (int i = 1; i < numChannels + 1; i++) {
             double melcenter = i * dmel;
             melCenters.push_back(melcenter);
         }
-        
+
         // 各フィルタの中心周波数をHzに変換
         std::vector<double> fCenters;
-        for (int i=0; i<numChannels; i++) {
+        for (int i = 0; i < numChannels; i++) {
             double hz = mel2hz_fant(melCenters[i]);
             fCenters.push_back(hz);
         }
-        
+
         // 各フィルタの中心周波数を周波数インデックスに変換
         std::vector<double> indexCenters;
-        for (int i=0; i<numChannels; i++) {
+        for (int i = 0; i < numChannels; i++) {
             double roundedFCenter = round(fCenters[i] / df);
             indexCenters.push_back(roundedFCenter);
         }
-        
+
         // 各フィルタの開始位置のインデックス
         std::vector<double> indexStarts;
         indexStarts.push_back(0.0);
-        for (int i=0; i<numChannels-1; i++) {
+        for (int i = 0; i < numChannels - 1; i++) {
             indexStarts.push_back(indexCenters[i]);
         }
-        
+
         // 各フィルタの終了位置のインデックス
         std::vector<double> indexStops;
-        for (int i=1; i<numChannels; i++) {
+        for (int i = 1; i < numChannels; i++) {
             indexStops.push_back(indexCenters[i]);
         }
         indexStops.push_back(nmax);
-        
+
         // フィルタバンクの作成
         std::vector<MelFilterBank> filterBanks;
-        for (int i=0; i<numChannels; i++) {
+        for (int i = 0; i < numChannels; i++) {
             // 三角フィルタの左の直線の傾きから点を求める
             double increment = 1.0 / (indexCenters[i] - indexStarts[i]);
             std::vector<double> filter;
-            for (int j=indexStarts[i]; j<indexCenters[i]; j++) {
+            for (int j = indexStarts[i]; j < indexCenters[i]; j++) {
                 double filterValue = (j - indexStarts[i]) * increment;
                 filter.push_back(filterValue);
             }
-            
+
             // 三角フィルタの右の直線の傾きから点を求める
             double decrement = 1.0 / (indexStops[i] - indexCenters[i]);
             std::vector<double> decrementVector;
-            for (int j=indexCenters[i]; j<indexStops[i]; j++) {
+            for (int j = indexCenters[i]; j < indexStops[i]; j++) {
                 double filterValue = 1.0 - ((j - indexCenters[i]) * decrement);
                 filter.push_back(filterValue);
             }
-            
+
             MelFilterBank filterBank;
             filterBank.startIndex = indexStarts[i];
             filterBank.centerIndex = indexCenters[i];
@@ -133,12 +135,10 @@ public:
             filterBank.filter = filter;
             filterBanks.push_back(filterBank);
         }
-        
+
         return filterBanks;
     }
-    
-    
-    
+
     /*
      
      def melFilterBank(fs, nfft, numChannels):
@@ -191,28 +191,28 @@ public:
      show()
      
      */
-    
-    
-    static void plotMelFilterBank(double fs, double nfft, int numChannels) {
-        
+
+    static void plotMelFilterBank(double fs, double nfft, int numChannels)
+    {
+
         MelScale a;
         std::vector<MelFilterBank> melFilterBank = a.melFilterBank(fs, nfft, numChannels);
-        
-        for (int k=0; k<melFilterBank.size(); k++) {
+
+        for (int k = 0; k < melFilterBank.size(); k++) {
             std::ofstream tmpstream("melfilter" + std::to_string(k));
-            for (int i=0; i<melFilterBank[k].filter.size(); i++) {
+            for (int i = 0; i < melFilterBank[k].filter.size(); i++) {
                 tmpstream << melFilterBank[k].startIndex + i << " ";
                 tmpstream << melFilterBank[k].filter[i] << std::endl;
             }
             tmpstream.close();
         }
-        
+
         std::string pipe = "/usr/local/bin/gnuplot -persist -e \" p ";
-        for (int i=0; i<numChannels; i++) {
+        for (int i = 0; i < numChannels; i++) {
             pipe += "'melfilter" + std::to_string(i) + "' w l notitle,";
         }
         pipe += "\"";
-        
+
         system(pipe.c_str());
     }
 };

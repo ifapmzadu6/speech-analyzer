@@ -5,11 +5,11 @@
 
 #include "kmeans_method.h"
 
-
-KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double>> &inputs, int dim, int countOfCluster) {
+KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double> >& inputs, int dim, int countOfCluster)
+{
 
     int size = inputs.size();
-    std::vector<std::vector<double>> clusters(countOfCluster, std::vector<double>(dim, 0));
+    std::vector<std::vector<double> > clusters(countOfCluster, std::vector<double>(dim, 0));
 
     std::cout << "- Clustering -" << std::endl;
 
@@ -46,7 +46,6 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
             }
         }
 
-
         bool isChanged = false;
 
         // 入力をそれぞれ一番近いクラスタに付与
@@ -79,11 +78,10 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
         if (isChanged == false) {
             break;
         }
-
     }
 
     // 一つも属されていないクラスタを削除する
-    for (int i = countOfCluster-1; i >= 0; i--) {
+    for (int i = countOfCluster - 1; i >= 0; i--) {
         int count = 0;
         for (int j = 0; j < size; j++) {
             if (clusterOfInputs[j] == i) {
@@ -108,15 +106,15 @@ KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double
     return result;
 }
 
-
-std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs, int dim, int countOfCluster) {
+std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double> >& inputs, int dim, int countOfCluster)
+{
     // メルセンヌツイスタの初期化
     std::random_device random_device;
     std::mt19937 mt(random_device());
 
     std::vector<int> indexOfCluster;
     // まず最初に乱数で一つだけ追加
-    std::uniform_int_distribution<int> score(0, inputs.size()-1);
+    std::uniform_int_distribution<int> score(0, inputs.size() - 1);
     indexOfCluster.push_back(score(mt));
 
     while (indexOfCluster.size() < countOfCluster) {
@@ -195,4 +193,3 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
     }
     return clusterOfInputs;
 }
-
