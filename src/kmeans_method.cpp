@@ -118,47 +118,42 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
     indexOfCluster.push_back(score(mt));
 
     while (indexOfCluster.size() < countOfCluster) {
+
         std::vector<double> distances;
         for (int i = 0; i < inputs.size(); i++) {
             std::vector<double> input = inputs[i];
 
-            // 一番近いクラスタを探す
-            double minDistance = std::numeric_limits<double>::max();
-            int nearstCluster;
+            // 一番近いクラスタとの距離
+            double minD = std::numeric_limits<double>::max();
             for (int j = 0; j < indexOfCluster.size(); j++) {
                 int index = indexOfCluster[j];
-                double distanceForCluster = 0;
+                std::vector<double> cluster = inputs[index];
+
+                double d = 0;
                 for (int k = 0; k < dim; k++) {
-                    distanceForCluster += pow(inputs[index][k] - input[k], 2.0);
+                    d += pow(cluster[k] - input[k], 2.0);
                 }
-                if (distanceForCluster < minDistance) {
-                    minDistance = distanceForCluster;
-                    nearstCluster = j;
+                if (d < minD) {
+                    minD = d;
                 }
             }
 
-            // 一番近いクラスタとの距離を算出する
-            double distance = 0;
-            for (int j = 0; j < dim; j++) {
-                distance += pow(input[j] - inputs[nearstCluster][j], 2.0);
-            }
-            distances.push_back(distance);
+            distances.push_back(minD);
         }
 
         // 重み付き確率計算のために距離を範囲に変換
         double index = 0;
         for (int i = 0; i < distances.size(); i++) {
-            double distance = distances[i];
+            index += distances[i];
             distances[i] = index;
-            index += distance;
         }
         // 0 ~ 最大値までの乱数生成
-        std::uniform_real_distribution<double> score(0, index);
+        std::uniform_real_distribution<double> score(0.0, index);
         double random = score(mt);
         // 乱数がどこに含まれるかを探索
         int result = -1;
         for (int i = 0; i < distances.size(); i++) {
-            if (distances[i] > random) {
+            if (distances[i] >= random) {
                 result = i;
                 break;
             }
@@ -167,6 +162,7 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
         if (result >= 0) {
             indexOfCluster.push_back(result);
         }
+
     }
 
     std::vector<int> clusterOfInputs;
@@ -174,21 +170,23 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
     for (int i = 0; i < inputs.size(); i++) {
         std::vector<double> input = inputs[i];
 
-        double minDistance = std::numeric_limits<double>::max();
-        int minIndex;
+        double minD = std::numeric_limits<double>::max();
+        int minIndex = 0;
         // 一番近いクラスタを検索
         for (int j = 0; j < countOfCluster; j++) {
             int index = indexOfCluster[j];
             std::vector<double> cluster = inputs[index];
-            double distance = 0;
+
+            double d = 0;
             for (int k = 0; k < dim; k++) {
-                distance += pow(input[k] - cluster[k], 2.0);
+                d += pow(input[k] - cluster[k], 2.0);
             }
-            if (distance < minDistance) {
-                minDistance = distance;
+            if (d < minD) {
+                minD = d;
                 minIndex = j;
             }
         }
+
         clusterOfInputs.push_back(minIndex);
     }
     return clusterOfInputs;
