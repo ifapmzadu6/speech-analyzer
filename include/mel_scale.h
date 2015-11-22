@@ -1,13 +1,6 @@
-//
-//  MelScale.h
-//  TermRankingMethod
-//
-//  Created by 狩宿恵介 on 2015/01/29.
-//  Copyright (c) 2015年 Keisuke Karijuku. All rights reserved.
-//
 
-#ifndef TermRankingMethod_MelScale_h
-#define TermRankingMethod_MelScale_h
+#ifndef mel_scale_h
+#define mel_scale_h
 
 #include <cmath>
 #include <string>

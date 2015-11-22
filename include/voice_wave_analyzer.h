@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 
+#ifndef voice_wave_analyzer_h
+#define voice_wave_analyzer_h
+
 /*
  * Cycle: 周期を表す構造体
  *
@@ -32,3 +35,5 @@ public:
         int minLength,
         int maxLength);
 };
+
+#endif

@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 
+#ifndef kmeans_method_h
+#define kmeans_method_h
+
 struct KMeansMethodResult {
     std::vector<std::vector<double> > clusters;
     std::vector<int> indexOfCluster;
@@ -17,3 +20,5 @@ private:
         const int dim,
         const int countOfCluster);
 };
+
+#endif

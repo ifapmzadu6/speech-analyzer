@@ -1,6 +1,9 @@
 #include <cmath>
 #include <vector>
 
+#ifndef rbf_h
+#define rbf_h
+
 class RadiaBasisFunction {
 
 public:
@@ -11,3 +14,5 @@ private:
     static void mult(std::vector<std::vector<double> >& Y, const std::vector<std::vector<double> >& A, const std::vector<std::vector<double> >& B);
     static double squeredNorm(const std::vector<double>& a, const std::vector<double>& b);
 };
+
+#endif

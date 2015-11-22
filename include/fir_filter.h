@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 
+#ifndef fir_filter_h
+#define fir_filter_h
+
 class FIRFilter {
 
 public:
@@ -33,3 +36,5 @@ private:
     double numerator;
     double total;
 };
+
+#endif

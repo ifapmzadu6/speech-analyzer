@@ -3,6 +3,9 @@
 #include <vector>
 #include <fftw3.h>
 
+#ifndef audio_h
+#define audio_h
+
 struct AudioComplex {
     double re;
     double im;
@@ -25,3 +28,5 @@ public:
      */
     static std::vector<double> dct_r2r_1d_reverse_vector(std::vector<double> input_vector);
 };
+
+#endif

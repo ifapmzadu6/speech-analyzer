@@ -162,7 +162,6 @@ std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::
         if (result >= 0) {
             indexOfCluster.push_back(result);
         }
-
     }
 
     std::vector<int> clusterOfInputs;

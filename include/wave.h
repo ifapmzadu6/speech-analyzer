@@ -1,7 +1,8 @@
-#pragma once
-
 #include <vector>
 #include <string>
+
+#ifndef wave_h
+#define wave_h
 
 // define
 const unsigned char STR_RIFF[] = { 'R', 'I', 'F', 'F' };
@@ -157,3 +158,5 @@ private:
     // Resampling
     double Sinc(const double x);
 };
+
+#endif

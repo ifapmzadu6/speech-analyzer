@@ -1,7 +1,9 @@
-
 #include <iostream>
 #include <vector>
 #include <string>
+
+#ifndef gnuplot_h
+#define gnuplot_h
 
 template <typename T>
 class Gnuplot {
@@ -23,3 +25,5 @@ public:
     static void OutputCyclize2D(std::vector<std::vector<T> >& outputs, std::string title, const char* option);
     static void OutputCyclize2D(std::vector<std::vector<T> >& outputs, std::string title, const char* option, const char* filename);
 };
+
+#endif

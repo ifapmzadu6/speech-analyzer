@@ -2,6 +2,9 @@
 #include <vector>
 #include <string>
 
+#ifndef julius_importer_h
+#define julius_importer_h
+
 struct JuliusResult {
     double from;
     double to;
@@ -26,3 +29,5 @@ private:
 
     std::vector<std::string> split(const std::string& str, char delim);
 };
+
+#endif

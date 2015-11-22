@@ -1,13 +1,6 @@
-//
-//  LorenzSystem.h
-//  TermRankingMethod
-//
-//  Created by Keisuke Karijuku on 2014/12/20.
-//  Copyright (c) 2014年 Keisuke Karijuku. All rights reserved.
-//
 
-#ifndef TermRankingMethod_LorenzSystem_h
-#define TermRankingMethod_LorenzSystem_h
+#ifndef lorenz_system_h
+#define lorenz_system_h
 
 class LorenzSystem {
 public:

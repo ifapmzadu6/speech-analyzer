@@ -2,6 +2,9 @@
 #include <vector>
 #include <cmath>
 
+#ifndef rnn_layer_h
+#define rnn_layer_h
+
 class RnnLayer {
 
 public:
@@ -28,3 +31,5 @@ private:
 
     std::vector<double> mid;
 };
+
+#endif
