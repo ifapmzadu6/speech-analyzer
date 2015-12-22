@@ -5,6 +5,7 @@
 #include <climits>
 #include <cmath>
 #include <sstream>
+#include <random>
 
 #include "wave.h"
 #include "voice_wave_analyzer.h"
@@ -13,7 +14,6 @@
 #include "julius_importer.h"
 #include "audio.h"
 #include "linear_interpolation.h"
-#include "fir_filter.h"
 #include "kernel_density_estimation.h"
 #include "util.h"
 
@@ -33,9 +33,9 @@ struct UnitWave {
 
 std::vector<UnitWave> unitWaves;
 
+
 int main()
 {
-
     int samplingSize = 16000;
 
     // auto input = getInput("./resource/a.wav", 15000);
@@ -50,7 +50,7 @@ int main()
         auto juliusResults = juliusImporter.getJuliusResults();
         auto splittedDataByJulius = Util::GetSplittedDataByJulius(inputForJulius, samplingSize, juliusResults);
 
-        for (int i = 0; i < juliusResults.size() - 1; i++) {
+        for (int i = 0; i < juliusResults.size(); i++) {
             auto result = juliusResults[i];
             if (((result.unit == "a") || (result.unit == "i") || (result.unit == "u") || (result.unit == "e") || (result.unit == "o"))) {
                 int from = result.from * samplingSize;
@@ -59,50 +59,54 @@ int main()
                 // showClustering(splittedDataByJulius[i], samplingSize);
             }
         }
-
-        if (true) {
-            std::vector<double> vectors;
-            for (int i = 0; i < 5; i++) {
-                vectors.push_back(inputForJulius[i]);
-            }
-
-            FIRFilter filter(vectors.size(), vectors);
-
-            std::vector<double> output;
-            for (int i = vectors.size(); i < inputForJulius.size(); i++) {
-                filter.next(inputForJulius[i]);
-                output.push_back(filter.getValue());
-            }
-
-            Wave wav_;
-            wav_.CreateWave(output, samplingSize, 16);
-            wav_.OutputWave("./output/heikin.wav");
-        }
-
         Wave wav;
         wav.CreateWave(inputForJulius, samplingSize, 16);
         wav.OutputWave("./output/input.wav");
     }
 
     std::vector<std::vector<double> > waves;
+    std::vector<int> indexesOfWaves;
     for (int i = 0; i < unitWaves.size(); i++) {
-        if (unitWaves[i].unit == "a") {
-            auto wave = LinearInterpolation::convert(unitWaves[i].wave, 200);
+        if (unitWaves[i].unit == "a" && unitWaves[i].before == "t") {
+            auto wave = LinearInterpolation::convert(unitWaves[i].wave, 300);
             waves.push_back(wave);
+            indexesOfWaves.push_back(i);
         }
     }
-    Gnuplot<double>::Output2D(waves, "unitWaves",
-        "w l lc rgb '#E0FF0000'");
 
     std::cout << std::endl;
     std::cout << "waves.size() -> " << waves.size() << std::endl;
 
+    int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(waves);
+    std::vector<double> bestWave = waves[bestIndex];
+    std::vector<std::vector<double> > org;
+    for (int i = 0; i < waves.size(); i++) {
+        std::vector<double> vec = Util::MiximizeCrossCorrelation(waves[i], bestWave);
+        vec = Util::ZerofyFirstAndLast(vec);
+        vec = Util::NormalizeVector(vec);
+        org.push_back(vec);
+    }
+    Gnuplot<double>::Output2D(org, "unitWaves",
+        "w l lc rgb '#E0FF0000'");
+
     // クラスタリング
     int countOfCluster = 10;
-    // int dim = targetSize + padding;
     int dim = waves[0].size();
-    KMeansMethodResult result = KMeansMethod::Clustering(waves, dim, countOfCluster);
-    Gnuplot<double>::Output2D(result.clusters, "waves.result.clusters", "w l");
+    KMeansMethodResult result = KMeansMethod::Clustering(org, dim, countOfCluster);
+    Gnuplot<double>::Output2D(result.clusters, "org.result.clusters", "w l");
+
+    for (int i=0; i<result.indexOfCluster.size(); i++) {
+        int index = result.indexOfCluster[i];
+        std::vector<double> wave = org[index];
+        int unitIndex = indexesOfWaves[index];
+        UnitWave unitWave = unitWaves[unitIndex];
+
+        std::stringstream ss;
+        ss << unitWave.before << "-" << unitWave.unit << "-" << unitWave.after;
+        std::string gnuplotSubtitle = ss.str();
+
+        Gnuplot<double>::Output(wave, gnuplotSubtitle, "w l");
+    }
 
     return 0;
 }
@@ -153,7 +157,7 @@ void showClustering(std::vector<double>& input, int samplingSize)
     Gnuplot<double>::Output2D(result.clusters, "result.clusters", "w l");
 
     // どのクラスターが正解に近いかを表示
-    if (true) {
+    if (false) {
         std::vector<std::vector<double> > clusters = result.clusters;
         std::vector<double> bestCluster;
         double best = std::numeric_limits<double>::max();
@@ -192,7 +196,7 @@ void showClustering(std::vector<double>& input, int samplingSize)
     */
 
     // エラー率を算出
-    if (true) {
+    if (false) {
         std::vector<double> errors;
         for (int i = 0; i < inputCycles.size(); i++) {
             // 一番近いクラスター
@@ -213,7 +217,7 @@ void showClustering(std::vector<double>& input, int samplingSize)
     }
 
     // 積分(=エネルギーを見る)
-    if (true) {
+    if (false) {
         std::vector<double> energy;
         for (int i = 0; i < inputCycles.size(); i++) {
             double e = 0;
@@ -289,13 +293,10 @@ void enumurateJulius(std::vector<double>& input, int samplingSize, int from,
         unitWave.wave = defaultWave;
         unitWaves.push_back(unitWave);
     }
-
-    /*
-       if (true) {
-       Gnuplot<double>::OutputCyclize(defaultWave, gnuplotSubtitle + "defaultWave",
-       "w l");
-       }
-       */
+    if (false) {
+        Gnuplot<double>::OutputCyclize(defaultWave, gnuplotSubtitle + "defaultWave",
+            "w l");
+    }
     /*
     if (juliusResults[indexOfJulius].unit == "a") {
         if (true) {
@@ -326,7 +327,7 @@ void enumurateJulius(std::vector<double>& input, int samplingSize, int from,
     }
 
     // 入力の書き換え
-    if (true) {
+    if (false) {
         for (int i = 0; i < cycles.size(); i++) {
             double max = -1, min = 1;
             for (int k = 0; k < cycles[i].length; k++) {

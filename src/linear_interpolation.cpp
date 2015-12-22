@@ -9,9 +9,14 @@ std::vector<double> LinearInterpolation::convert(std::vector<double>& input, int
     for (int i = 0; i < toCycle; i++) {
         double v = rate * i;
         int x = (int)(v);
-        double a = (v)-x;
-        double value = (1.0 - a) * input[x] + a * input[x + 1];
-        output.push_back(value);
+        if (x < input.size()) {
+            double a = (v)-x;
+            double value = (1.0 - a) * input[x] + a * input[x + 1];
+            output.push_back(value);
+        }
+        else {
+            output.push_back(0);
+        }
     }
     return output;
 }

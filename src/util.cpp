@@ -23,8 +23,25 @@ std::vector<double> Util::GetInput(std::string path, int padding)
     return input;
 }
 
+std::vector<double>
+Util::NormalizeVector(std::vector<double> input)
+{
+    double max = 0;
+    for (int i=0; i<input.size(); i++) {
+        double value = input[i];
+        if (max < fabs(value)) {
+            max = fabs(value);
+        }
+    }
+    for (int i=0; i<input.size(); i++) {
+        input[i] /= max;
+    }
+    return input;
+}
+
+
 std::vector<std::vector<double> >
-Util::NormalizeVector(std::vector<std::vector<double> >& input)
+Util::NormalizeVectors(std::vector<std::vector<double> > input)
 {
     for (int i = 0; i < input.size(); i++) {
         double max = 0;
@@ -49,6 +66,47 @@ std::vector<double> Util::CopyVector(std::vector<double>& input, int begin,
         vector.push_back(input[begin + j]);
     }
     return vector;
+}
+
+std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, std::vector<double> vec)
+{
+    if (input.size() != vec.size()) {
+        abort();
+    }
+
+    int maxIndex = 0;
+    double maxD = 0;
+    int length = input.size();
+    for (int i = 0; i < length; i++) {
+
+        double d = 0;
+        for (int j = 0; j < length; j++) {
+            d += input[(i + j) % length] * vec[j];
+        }
+        if (maxD < d) {
+            maxD = d;
+            maxIndex = i;
+        }
+    }
+
+    std::vector<double> output;
+    for (int i = 0; i < length; i++) {
+        output.push_back(input[(maxIndex + i) % length]);
+    }
+    return output;
+}
+
+std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input)
+{
+    double first = input[0];
+    double last = input[input.size() - 1];
+    double ave = (first + last) / 2;
+    std::vector<double> output;
+    for (int i = 0; i < input.size(); i++) {
+        double val = input[i] - ave;
+        output.push_back(val);
+    }
+    return output;
 }
 
 // Julius
