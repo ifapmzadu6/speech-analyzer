@@ -33,7 +33,6 @@ struct UnitWave {
 
 std::vector<UnitWave> unitWaves;
 
-
 int main()
 {
     int samplingSize = 16000;
@@ -64,48 +63,75 @@ int main()
         wav.OutputWave("./output/input.wav");
     }
 
-    std::vector<std::vector<double> > waves;
-    std::vector<int> indexesOfWaves;
-    for (int i = 0; i < unitWaves.size(); i++) {
-        if (unitWaves[i].unit == "a" && unitWaves[i].before == "t") {
-            auto wave = LinearInterpolation::convert(unitWaves[i].wave, 300);
-            waves.push_back(wave);
-            indexesOfWaves.push_back(i);
+
+    // * + 母音 + * で分類
+    std::vector<std::vector<UnitWave>> tryphones;
+    for (int i=0; i<unitWaves.size(); i++) {
+        UnitWave unitWave = unitWaves[i];
+
+        int indexOfTryphones = -1;
+        for (int j=0; j<tryphones.size(); j++) {
+            UnitWave firstUnitWave = tryphones[j][0];
+            if (unitWave.unit == firstUnitWave.unit &&
+                    unitWave.before == firstUnitWave.before &&
+                    unitWave.after == firstUnitWave.after) {
+                indexOfTryphones = j;
+            }
+        }
+        if (indexOfTryphones >= 0) { // 既存のものがあった場合
+            std::vector<UnitWave> tryphone = tryphones[indexOfTryphones];
+            tryphone.push_back(unitWave);
+            tryphones[indexOfTryphones] = tryphone;
+        }
+        else { // 既存のものがない場合
+            std::vector<UnitWave> tryphone;
+            tryphone.push_back(unitWave);
+            tryphones.push_back(tryphone);
         }
     }
 
-    std::cout << std::endl;
-    std::cout << "waves.size() -> " << waves.size() << std::endl;
-
-    int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(waves);
-    std::vector<double> bestWave = waves[bestIndex];
-    std::vector<std::vector<double> > org;
-    for (int i = 0; i < waves.size(); i++) {
-        std::vector<double> vec = Util::MiximizeCrossCorrelation(waves[i], bestWave);
-        vec = Util::ZerofyFirstAndLast(vec);
-        vec = Util::NormalizeVector(vec);
-        org.push_back(vec);
+    if (true) {
+        std::cout << "Total: " << unitWaves.size() << std::endl;
+        for (int i=0; i<tryphones.size(); i++) {
+            std::vector<UnitWave> units = tryphones[i];
+            std::cout << units[0].before << "-" << units[0].unit << "-" << units[0].after << ": " << units.size() << std::endl;
+        }
     }
-    Gnuplot<double>::Output2D(org, "unitWaves",
-        "w l lc rgb '#E0FF0000'");
 
-    // クラスタリング
-    int countOfCluster = 10;
-    int dim = waves[0].size();
-    KMeansMethodResult result = KMeansMethod::Clustering(org, dim, countOfCluster);
-    Gnuplot<double>::Output2D(result.clusters, "org.result.clusters", "w l");
+    for (int i=0; i<tryphones.size(); i++) {
+        std::vector<UnitWave> units = tryphones[i];
+        if (units[0].unit != "a") {
+            continue;
+        }
 
-    for (int i=0; i<result.indexOfCluster.size(); i++) {
-        int index = result.indexOfCluster[i];
-        std::vector<double> wave = org[index];
-        int unitIndex = indexesOfWaves[index];
-        UnitWave unitWave = unitWaves[unitIndex];
+        std::vector<std::vector<double> > waves;
+        std::vector<int> indexesOfWaves;
+        for (int i = 0; i < units.size(); i++) {
+            auto wave = LinearInterpolation::convert(units[i].wave, 300);
+            waves.push_back(wave);
+            indexesOfWaves.push_back(i);
+        }
 
-        std::stringstream ss;
-        ss << unitWave.before << "-" << unitWave.unit << "-" << unitWave.after;
-        std::string gnuplotSubtitle = ss.str();
+        int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(waves);
+        std::vector<double> bestWave = waves[bestIndex];
+        std::vector<std::vector<double> > org;
+        for (int i = 0; i < waves.size(); i++) {
+            std::vector<double> vec = Util::MiximizeCrossCorrelation(waves[i], bestWave);
+            vec = Util::ZerofyFirstAndLast(vec);
+            //vec = Util::NormalizeVector(vec);
+            org.push_back(vec);
+        }
+        org = Util::NormalizeSummation(org);
+        Gnuplot<double>::Output2D(org, "unitWaves",
+                "w l lc rgb '#E0FF0000'");
 
-        Gnuplot<double>::Output(wave, gnuplotSubtitle, "w l");
+        int countOfCluster = 10;
+        int dim = waves[0].size();
+        KMeansMethodResult result = KMeansMethod::Clustering(org, dim, countOfCluster);
+        Gnuplot<double>::Output2D(result.clusters, "org.result.clusters", "w l");
+
+        int bestClusterIndex = KernelDensityEstimation::IndexOfMaxDensity(org);
+        Gnuplot<double>::Output(org[bestClusterIndex], "most best waveform", "w l");
     }
 
     return 0;
@@ -146,6 +172,7 @@ void showClustering(std::vector<double>& input, int samplingSize)
 
         inputCycles.push_back(inputCycle);
     }
+    inputCycles = Util::NormalizeSummation(inputCycles);
     Gnuplot<double>::Output2D(inputCycles, "inputCycles",
         "w l lc rgb '#E0FF0000'");
 
@@ -269,9 +296,6 @@ void enumurateJulius(std::vector<double>& input, int samplingSize, int from,
         std::vector<std::vector<double> > inputCycles;
         for (int i = 0; i < cycles.size(); i++) {
             std::vector<double> inputCycle = Util::CopyVector(julius, cycles[i].index, cycles[i].length);
-            // 足りない分を0で埋める
-            // int padding = 14;
-            // while (inputCycle.size() < targetSize + padding) inputCycle.push_back(0);
             // 波形の長さを揃える
             inputCycle = LinearInterpolation::convert(inputCycle, maxLength);
             inputCycles.push_back(inputCycle);

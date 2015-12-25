@@ -20,7 +20,6 @@ private:
     static std::vector<int> getInitialClusterOfInputs(const std::vector<std::vector<double> >& inputs,
         const int dim,
         const int countOfCluster);
-
 };
 
 #endif

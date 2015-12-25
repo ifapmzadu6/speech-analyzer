@@ -27,18 +27,17 @@ std::vector<double>
 Util::NormalizeVector(std::vector<double> input)
 {
     double max = 0;
-    for (int i=0; i<input.size(); i++) {
+    for (int i = 0; i < input.size(); i++) {
         double value = input[i];
         if (max < fabs(value)) {
             max = fabs(value);
         }
     }
-    for (int i=0; i<input.size(); i++) {
+    for (int i = 0; i < input.size(); i++) {
         input[i] /= max;
     }
     return input;
 }
-
 
 std::vector<std::vector<double> >
 Util::NormalizeVectors(std::vector<std::vector<double> > input)
@@ -53,6 +52,30 @@ Util::NormalizeVectors(std::vector<std::vector<double> > input)
         }
         for (int j = 0; j < input[i].size(); j++) {
             input[i][j] /= max;
+        }
+    }
+    return input;
+}
+
+std::vector<std::vector<double> > Util::NormalizeSummation(std::vector<std::vector<double> > input)
+{
+    std::vector<double> sum;
+    for (int i = 0; i < input.size(); i++) {
+        double d = 0;
+        for (int j = 0; j < input[i].size(); j++) {
+            d += std::abs(input[i][j]);
+        }
+        sum.push_back(d);
+    }
+    double max = 0;
+    for (int i = 0; i < sum.size(); i++) {
+        if (sum[i] > max) {
+            max = sum[i];
+        }
+    }
+    for (int i = 0; i < input.size(); i++) {
+        for (int j = 0; j < input[i].size(); j++) {
+            input[i][j] /= sum[i] / max;
         }
     }
     return input;

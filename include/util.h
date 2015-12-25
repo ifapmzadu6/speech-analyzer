@@ -17,6 +17,8 @@ public:
     static std::vector<std::vector<double> >
     NormalizeVectors(std::vector<std::vector<double> > input);
 
+    static std::vector<std::vector<double> > NormalizeSummation(std::vector<std::vector<double> > input);
+
     static std::vector<double> CopyVector(std::vector<double>& input, int begin,
         int length);
 
