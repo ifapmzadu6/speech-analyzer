@@ -1,9 +1,8 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <string>
-
-#ifndef julius_importer_h
-#define julius_importer_h
 
 struct JuliusResult {
     double from;
@@ -12,22 +11,19 @@ struct JuliusResult {
 };
 
 class JuliusImporter {
-public:
+   public:
     std::string filepath;
 
     JuliusImporter() { abort(); };
 
-    JuliusImporter(std::string filepath)
-        : filepath(filepath){};
+    JuliusImporter(std::string filepath) : filepath(filepath){};
 
     std::vector<JuliusResult> getJuliusResults();
 
-private:
+   private:
     static const int samplingSize = 16000;
     static const int frameSize = 400;
     static const int frameShiftSize = 160;
 
-    std::vector<std::string> split(const std::string& str, char delim);
+    std::vector<std::string> split(const std::string &str, char delim);
 };
-
-#endif

@@ -1,16 +1,13 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <cmath>
 
-#ifndef kernel_density_estimation_h
-#define kernel_density_estimation_h
-
 class KernelDensityEstimation {
-public:
-    static int IndexOfMaxDensity(std::vector<std::vector<double> >& inputs);
+   public:
+    static int IndexOfMaxDensity(std::vector<std::vector<double>> &inputs);
 
-private:
+   private:
     inline static double gaussian(double x);
 };
-
-#endif

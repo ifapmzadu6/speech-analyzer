@@ -2,8 +2,7 @@
 
 #include "julius_importer.h"
 
-std::vector<JuliusResult> JuliusImporter::getJuliusResults()
-{
+std::vector<JuliusResult> JuliusImporter::getJuliusResults() {
     std::ifstream ifs(filepath);
     if (ifs.fail()) {
         std::cerr << "Can't open " << filepath << std::endl;
@@ -24,8 +23,8 @@ std::vector<JuliusResult> JuliusImporter::getJuliusResults()
     return results;
 };
 
-std::vector<std::string> JuliusImporter::split(const std::string& str, char delim)
-{
+std::vector<std::string> JuliusImporter::split(const std::string &str,
+                                               char delim) {
     std::vector<std::string> res;
     size_t current = 0, found;
     while ((found = str.find_first_of(delim, current)) != std::string::npos) {

@@ -1,8 +1,7 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
-
-#ifndef voice_wave_analyzer_h
-#define voice_wave_analyzer_h
 
 /*
  * Cycle: 周期を表す構造体
@@ -19,21 +18,16 @@ struct Cycle {
  * VoiceWaveAnalyzer: Waveフォーマットの音声解析クラス
  */
 class VoiceWaveAnalyzer {
-
-public:
+   public:
     /*
-	 * GetCycles: 周期を解析する
-	 *
-	 * @input: 入力波形
-	 * @samplingfrequency: サンプリング周波数（Hz）
-	 * @minLength: 求める周期の最小（Hz）
-	 * @maxLength: 求める周期の最大（Hz）
-	 */
-    static std::vector<Cycle> GetCycles(
-        const std::vector<double>& input,
-        int samplingFrequency,
-        int minLength,
-        int maxLength);
+         * GetCycles: 周期を解析する
+         *
+         * @input: 入力波形
+         * @samplingfrequency: サンプリング周波数（Hz）
+         * @minLength: 求める周期の最小（Hz）
+         * @maxLength: 求める周期の最大（Hz）
+         */
+    static std::vector<Cycle> GetCycles(const std::vector<double> &input,
+                                        int samplingFrequency, int minLength,
+                                        int maxLength);
 };
-
-#endif

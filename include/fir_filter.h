@@ -1,19 +1,16 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 
-#ifndef fir_filter_h
-#define fir_filter_h
-
 class FIRFilter {
-
-public:
+   public:
     FIRFilter(int count, std::vector<double> init)
-        : count(count)
-        , bufferIndex(count)
-        , wma(0.0)
-        , numerator(0.0)
-        , total(0.0)
-    {
+        : count(count),
+          bufferIndex(count),
+          wma(0.0),
+          numerator(0.0),
+          total(0.0) {
         buffer = std::vector<double>(count, 0);
         for (int i = 0; i < count; i++) {
             next(init[i]);
@@ -23,7 +20,7 @@ public:
     void next(double value);
     double getValue();
 
-private:
+   private:
     int count;
 
     std::vector<double> buffer;
@@ -36,5 +33,3 @@ private:
     double numerator;
     double total;
 };
-
-#endif

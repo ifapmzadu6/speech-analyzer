@@ -5,26 +5,21 @@
 
 #include "Wave.h"
 
-Wave::Wave()
-{
+Wave::Wave() {
     wavename = "temp.wav";
     flag = false;
 }
 
-Wave::~Wave()
-{
-}
+Wave::~Wave() {}
 
-double Wave::Sinc(const double x)
-{
+double Wave::Sinc(const double x) {
     if (x == 0.0)
         return 1.0;
     else
         return sin(x) / x;
 }
 
-int Wave::InputWave(const std::string filename)
-{
+int Wave::InputWave(const std::string filename) {
     if (filename.compare(filename.size() - 4, 4, ".wav") == 0) {
         ldata.clear();
         rdata.clear();
@@ -35,16 +30,14 @@ int Wave::InputWave(const std::string filename)
         DumpData();
         SetHeader();
         flag = true;
-    }
-    else {
+    } else {
         std::cerr << "error .wav" << std::endl;
         return -1;
     }
     return 0;
 }
 
-int Wave::WavHdrRead()
-{
+int Wave::WavHdrRead() {
     std::ifstream fin;
     long cursor, len;
 
@@ -54,7 +47,7 @@ int Wave::WavHdrRead()
         return -1;
     }
     // ヘッダ情報
-    fin.read((char*)&header, sizeof(header));
+    fin.read((char *)&header, sizeof(header));
     if (fin.bad()) {
         std::cerr << "読み込みエラー" << std::endl;
         exit(0);
@@ -76,7 +69,7 @@ int Wave::WavHdrRead()
 
     // チャンク情報
     while (!fin.eof()) {
-        fin.read((char*)&chunk, sizeof(chunk));
+        fin.read((char *)&chunk, sizeof(chunk));
         if (fin.bad()) {
             std::cerr << "読み込みエラー" << std::endl;
             exit(0);
@@ -85,20 +78,17 @@ int Wave::WavHdrRead()
         if (memcmp(chunk.hdrFmtData, STR_fmt, sizeof chunk.hdrFmtData) == 0) {
             len = chunk.sizeOfFmtData;
             cursor = fin.tellg();
-            if (ReadfmtChunk(&fin) != 0)
-                return -1;
+            if (ReadfmtChunk(&fin) != 0) return -1;
             samplesPerSec = wavfmtpcm.samplesPerSec;
             bitsPerSample = wavfmtpcm.bitsPerSample;
             channels = wavfmtpcm.channels;
             bytesPerSec = wavfmtpcm.bytesPerSec;
             fin.seekg(cursor + len, std::ios_base::beg);
-        }
-        else if (memcmp(chunk.hdrFmtData, STR_data, 4) == 0) {
+        } else if (memcmp(chunk.hdrFmtData, STR_data, 4) == 0) {
             sizeOfData = chunk.sizeOfFmtData;
             posOfData = fin.tellg();
             fin.seekg(sizeOfData + posOfData - 4, std::ios_base::beg);
-        }
-        else {
+        } else {
             len = chunk.sizeOfFmtData;
             cursor = fin.tellg();
             fin.seekg(cursor + len, std::ios::beg);
@@ -108,27 +98,36 @@ int Wave::WavHdrRead()
     return 0;
 }
 
-const int Wave::ReadfmtChunk(std::ifstream* fin)
-{
-    fin->read((char*)&wavfmtpcm, sizeof(tagWaveFormatPcm));
+const int Wave::ReadfmtChunk(std::ifstream *fin) {
+    fin->read((char *)&wavfmtpcm, sizeof(tagWaveFormatPcm));
     if (fin->bad()) {
         std::cerr << "読み込みエラー" << std::endl;
         exit(0);
     }
 
-    std::cout << "    formatTag: " << wavfmtpcm.formatTag << " (1 = PCM)" << std::endl;
-    std::cout << "    channels: " << wavfmtpcm.channels << "[channel]" << std::endl;
-    std::cout << "    samplesPerSec: " << wavfmtpcm.samplesPerSec << "[Hz]" << std::endl;
-    std::cout << "    bitsPerSample: " << wavfmtpcm.bitsPerSample << "[bits/sample]" << std::endl;
+    std::cout << "    formatTag: " << wavfmtpcm.formatTag << " (1 = PCM)"
+              << std::endl;
+    std::cout << "    channels: " << wavfmtpcm.channels << "[channel]"
+              << std::endl;
+    std::cout << "    samplesPerSec: " << wavfmtpcm.samplesPerSec << "[Hz]"
+              << std::endl;
+    std::cout << "    bitsPerSample: " << wavfmtpcm.bitsPerSample
+              << "[bits/sample]" << std::endl;
 
     if (wavfmtpcm.formatTag != 1) {
-        std::cerr << "\nこのプログラムは無圧縮PCMのみを対象とします." << std::endl;
-        std::cerr << "このwavファイルの形式は " << wavfmtpcm.formatTag << " です." << std::endl;
+        std::cerr << "\nこのプログラムは無圧縮PCMのみを対象とします."
+                  << std::endl;
+        std::cerr << "このwavファイルの形式は " << wavfmtpcm.formatTag
+                  << " です." << std::endl;
         return -1;
     }
-    if (wavfmtpcm.bitsPerSample != 8 && wavfmtpcm.bitsPerSample != 16 && wavfmtpcm.bitsPerSample != 24 && wavfmtpcm.bitsPerSample != 32) {
-        std::cerr << "\nこのプログラムは8/16/24ビットサンプリングされたものを対象とします." << std::endl;
-        std::cerr << "このwavファイルの bits/secは " << wavfmtpcm.bitsPerSample << " です." << std::endl;
+    if (wavfmtpcm.bitsPerSample != 8 && wavfmtpcm.bitsPerSample != 16 &&
+        wavfmtpcm.bitsPerSample != 24 && wavfmtpcm.bitsPerSample != 32) {
+        std::cerr << "\nこのプログラムは8/16/"
+                     "24ビットサンプリングされたものを対象とします."
+                  << std::endl;
+        std::cerr << "このwavファイルの bits/secは " << wavfmtpcm.bitsPerSample
+                  << " です." << std::endl;
         return -1;
     }
 
@@ -138,8 +137,7 @@ const int Wave::ReadfmtChunk(std::ifstream* fin)
  * wav データをダンプ
  */
 
-int Wave::DumpData()
-{
+int Wave::DumpData() {
     uint16_t bytesPerSingleCh;
 
     bytesPerSingleCh = bitsPerSample / 8;
@@ -153,8 +151,7 @@ int Wave::DumpData()
             return Dump24BitMonoWave();
         else
             return -1;
-    }
-    else if (channels == 2) {
+    } else if (channels == 2) {
         if (bytesPerSingleCh == 1)
             return Dump8BitStereoWave();
         else if (bytesPerSingleCh == 2)
@@ -163,8 +160,7 @@ int Wave::DumpData()
             return Dump24BitStereoWave();
         else
             return -1;
-    }
-    else {
+    } else {
         return -1;
     }
     return 0;
@@ -173,19 +169,18 @@ int Wave::DumpData()
 /*--------------------------------------------------------------------------
  * 8 bits/sampling Stereo
  */
-int Wave::Dump8BitStereoWave()
-{
+int Wave::Dump8BitStereoWave() {
     unsigned int i;
     char l, r;
     std::ifstream fin;
 
     fin.open(wavename, std::ios::binary);
 
-    fin.seekg(posOfData, std::ios::beg); //元ファイルのデータ開始部分へ
+    fin.seekg(posOfData, std::ios::beg);  //元ファイルのデータ開始部分へ
 
     for (i = 0; i < (sizeOfData / 2) / sizeof(char); i++) {
-        fin.read((char*)&l, sizeof(char));
-        fin.read((char*)&r, sizeof(char));
+        fin.read((char *)&l, sizeof(char));
+        fin.read((char *)&r, sizeof(char));
 
         ldata.push_back((double)l / (double)WAV_SIGNED_8BIT_MAX);
         rdata.push_back((double)r / (double)WAV_SIGNED_8BIT_MAX);
@@ -196,18 +191,17 @@ int Wave::Dump8BitStereoWave()
 /*--------------------------------------------------------------------------
  * 8 bits/sampling Mono
  */
-int Wave::Dump8BitMonoWave()
-{
+int Wave::Dump8BitMonoWave() {
     unsigned int i;
     char m;
     std::ifstream fin;
 
     fin.open(wavename, std::ios::binary);
 
-    fin.seekg(posOfData, std::ios::beg); //元ファイルのデータ開始部分へ
+    fin.seekg(posOfData, std::ios::beg);  //元ファイルのデータ開始部分へ
 
     for (i = 0; i < sizeOfData / sizeof(char); i++) {
-        fin.read((char*)&m, sizeof(char));
+        fin.read((char *)&m, sizeof(char));
 
         monodata.push_back((double)m / (double)WAV_SIGNED_16BIT_MAX);
     }
@@ -216,19 +210,18 @@ int Wave::Dump8BitMonoWave()
 /*--------------------------------------------------------------------------
  * 16 bits/sampling Stereo
  */
-int Wave::Dump16BitStereoWave()
-{
+int Wave::Dump16BitStereoWave() {
     unsigned int i;
     short l, r;
     std::ifstream fin;
 
     fin.open(wavename, std::ios::binary);
 
-    fin.seekg(posOfData, std::ios::beg); //元ファイルのデータ開始部分へ
+    fin.seekg(posOfData, std::ios::beg);  //元ファイルのデータ開始部分へ
 
     for (i = 0; i < (sizeOfData / 2) / (sizeof(char) * 2); i++) {
-        fin.read((char*)&l, sizeof(char) * 2);
-        fin.read((char*)&r, sizeof(char) * 2);
+        fin.read((char *)&l, sizeof(char) * 2);
+        fin.read((char *)&r, sizeof(char) * 2);
 
         ldata.push_back((double)l / (double)WAV_SIGNED_16BIT_MAX);
         rdata.push_back((double)r / (double)WAV_SIGNED_16BIT_MAX);
@@ -239,18 +232,17 @@ int Wave::Dump16BitStereoWave()
 /*--------------------------------------------------------------------------
  * 16 bits/sampling Mono
  */
-int Wave::Dump16BitMonoWave()
-{
+int Wave::Dump16BitMonoWave() {
     unsigned int i;
     short m;
     std::ifstream fin;
 
     fin.open(wavename, std::ios::binary);
 
-    fin.seekg(posOfData, std::ios::beg); //元ファイルのデータ開始部分へ
+    fin.seekg(posOfData, std::ios::beg);  //元ファイルのデータ開始部分へ
 
     for (i = 0; i < sizeOfData / (sizeof(char) * 2); i++) {
-        fin.read((char*)&m, sizeof(char) * 2);
+        fin.read((char *)&m, sizeof(char) * 2);
 
         monodata.push_back((double)m / (double)WAV_SIGNED_16BIT_MAX);
     }
@@ -260,19 +252,18 @@ int Wave::Dump16BitMonoWave()
 /*--------------------------------------------------------------------------
  * 24 bits/sampling Stereo
  */
-int Wave::Dump24BitStereoWave()
-{
+int Wave::Dump24BitStereoWave() {
     unsigned int i;
     int l, r;
     std::ifstream fin;
 
     fin.open(wavename, std::ios::binary);
 
-    fin.seekg(posOfData, std::ios::beg); //元ファイルのデータ開始部分へ
+    fin.seekg(posOfData, std::ios::beg);  //元ファイルのデータ開始部分へ
 
     for (i = 0; i < (sizeOfData / 2) / (sizeof(char) * 3); i++) {
-        fin.read((char*)&l, sizeof(char) * 3);
-        fin.read((char*)&r, sizeof(char) * 3);
+        fin.read((char *)&l, sizeof(char) * 3);
+        fin.read((char *)&r, sizeof(char) * 3);
 
         ldata.push_back((double)l / (double)WAV_SIGNED_24BIT_MAX);
         rdata.push_back((double)r / (double)WAV_SIGNED_24BIT_MAX);
@@ -283,18 +274,17 @@ int Wave::Dump24BitStereoWave()
 /*--------------------------------------------------------------------------
  * 24 bits/sampling Mono
  */
-int Wave::Dump24BitMonoWave()
-{
+int Wave::Dump24BitMonoWave() {
     unsigned int i;
     int m;
     std::ifstream fin;
 
     fin.open(wavename, std::ios::binary);
 
-    fin.seekg(posOfData, std::ios::beg); //元ファイルのデータ開始部分へ
+    fin.seekg(posOfData, std::ios::beg);  //元ファイルのデータ開始部分へ
 
     for (i = 0; i < sizeOfData / (sizeof(char) * 3); i++) {
-        fin.read((char*)&m, sizeof(char) * 3);
+        fin.read((char *)&m, sizeof(char) * 3);
 
         monodata.push_back((double)m / (double)WAV_SIGNED_24BIT_MAX);
     }
@@ -304,31 +294,33 @@ int Wave::Dump24BitMonoWave()
 /*--------------------------------------------------------------------------
  * ヘッダの作成
  */
-void Wave::SetHeader()
-{
+void Wave::SetHeader() {
     uint16_t bytes;
 
-    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff)); // RIFF
-    wavfhdr.sizeOfFile = sizeOfData + sizeof(tagWaveFileHeader) - 8; // ファイルサイズ
-    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave)); // WAVE
-    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt)); // fmt
-    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt; // sizeof( PCMWAVEFORMAT )
-    wavfhdr.wavfmt.formatTag = 1; // WAVE_FORMAT_PCM
-    wavfhdr.wavfmt.channels = channels; // mono/stereo
-    wavfhdr.wavfmt.samplesPerSec = samplesPerSec; // Hz
-    bytes = bitsPerSample / 8; // bytes/sec
-    wavfhdr.wavfmt.bytesPerSec = bytes * channels * samplesPerSec; // byte/サンプル*チャンネル
-    wavfhdr.wavfmt.blockAlign = bytes * channels; // block_Size
-    wavfhdr.wavfmt.bitsPerSample = bitsPerSample; // 16 bit / sample
-    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData)); // data
-    wavfhdr.sizeOfData = sizeOfData; // データ長 (byte)
+    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));  // RIFF
+    wavfhdr.sizeOfFile =
+        sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
+    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));  // WAVE
+    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));     // fmt
+    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;     // sizeof( PCMWAVEFORMAT )
+    wavfhdr.wavfmt.formatTag = 1;                  // WAVE_FORMAT_PCM
+    wavfhdr.wavfmt.channels = channels;            // mono/stereo
+    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;  // Hz
+    bytes = bitsPerSample / 8;                     // bytes/sec
+    wavfhdr.wavfmt.bytesPerSec =
+        bytes * channels * samplesPerSec;  // byte/サンプル*チャンネル
+    wavfhdr.wavfmt.blockAlign = bytes * channels;  // block_Size
+    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;  // 16 bit / sample
+    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));  // data
+    wavfhdr.sizeOfData = sizeOfData;  // データ長 (byte)
 }
 
 /*--------------------------------------------------------------------------
  * CreateWaveClass Mono
  */
-void Wave::CreateWave(const std::vector<double> mono, const uint16_t samples_per_sec, const uint16_t bits_per_sample)
-{
+void Wave::CreateWave(const std::vector<double> mono,
+                      const uint16_t samples_per_sec,
+                      const uint16_t bits_per_sample) {
     monodata.clear();
     ldata.clear();
     rdata.clear();
@@ -339,19 +331,21 @@ void Wave::CreateWave(const std::vector<double> mono, const uint16_t samples_per
     samplesPerSec = samples_per_sec;
     bitsPerSample = bits_per_sample;
 
-    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff)); // RIFF
-    wavfhdr.sizeOfFile = sizeOfData + sizeof(tagWaveFileHeader) - 8; // ファイルサイズ
-    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave)); // WAVE
-    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt)); // fmt
-    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt; // sizeof( PCMWAVEFORMAT )
-    wavfhdr.wavfmt.formatTag = 1; // WAVE_FORMAT_PCM
-    wavfhdr.wavfmt.channels = channels; // mono/stereo
-    wavfhdr.wavfmt.samplesPerSec = samplesPerSec; // Hz
-    bytes = bitsPerSample / 8; // bytes/sec
-    wavfhdr.wavfmt.bytesPerSec = bytes * channels * samplesPerSec; // byte/サンプル*チャンネル
-    wavfhdr.wavfmt.blockAlign = bytes * channels; // block_Size
-    wavfhdr.wavfmt.bitsPerSample = bitsPerSample; // 16 bit / sample
-    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData)); // data
+    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));  // RIFF
+    wavfhdr.sizeOfFile =
+        sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
+    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));  // WAVE
+    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));     // fmt
+    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;     // sizeof( PCMWAVEFORMAT )
+    wavfhdr.wavfmt.formatTag = 1;                  // WAVE_FORMAT_PCM
+    wavfhdr.wavfmt.channels = channels;            // mono/stereo
+    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;  // Hz
+    bytes = bitsPerSample / 8;                     // bytes/sec
+    wavfhdr.wavfmt.bytesPerSec =
+        bytes * channels * samplesPerSec;  // byte/サンプル*チャンネル
+    wavfhdr.wavfmt.blockAlign = bytes * channels;  // block_Size
+    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;  // 16 bit / sample
+    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));  // data
 
     sizeOfData = mono.size() * wavfhdr.wavfmt.blockAlign;
     wavfhdr.sizeOfData = sizeOfData;
@@ -361,8 +355,9 @@ void Wave::CreateWave(const std::vector<double> mono, const uint16_t samples_per
 /*--------------------------------------------------------------------------
  * CreateWaveClass stereo
  */
-void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, const uint16_t samples_per_sec, const uint16_t bits_per_sample)
-{
+void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR,
+                      const uint16_t samples_per_sec,
+                      const uint16_t bits_per_sample) {
     monodata.clear();
     ldata.clear();
     rdata.clear();
@@ -371,8 +366,7 @@ void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, 
 
     if (stereoL.size() > stereoR.size()) {
         stereoR.resize(stereoL.size());
-    }
-    else if (stereoL.size() < stereoR.size()) {
+    } else if (stereoL.size() < stereoR.size()) {
         stereoL.resize(stereoR.size());
     }
 
@@ -382,19 +376,21 @@ void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, 
     samplesPerSec = samples_per_sec;
     bitsPerSample = bits_per_sample;
 
-    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff)); // RIFF
-    wavfhdr.sizeOfFile = sizeOfData + sizeof(tagWaveFileHeader) - 8; // ファイルサイズ
-    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave)); // WAVE
-    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt)); // fmt
-    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt; // sizeof( PCMWAVEFORMAT )
-    wavfhdr.wavfmt.formatTag = 1; // WAVE_FORMAT_PCM
-    wavfhdr.wavfmt.channels = channels; // mono/stereo
-    wavfhdr.wavfmt.samplesPerSec = samplesPerSec; // Hz
-    bytes = bitsPerSample / 8; // bytes/sec
-    wavfhdr.wavfmt.bytesPerSec = bytes * channels * samplesPerSec; // byte/サンプル*チャンネル
-    wavfhdr.wavfmt.blockAlign = bytes * channels; // block_Size
-    wavfhdr.wavfmt.bitsPerSample = bitsPerSample; // 16 bit / sample
-    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData)); // data
+    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));  // RIFF
+    wavfhdr.sizeOfFile =
+        sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
+    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));  // WAVE
+    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));     // fmt
+    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;     // sizeof( PCMWAVEFORMAT )
+    wavfhdr.wavfmt.formatTag = 1;                  // WAVE_FORMAT_PCM
+    wavfhdr.wavfmt.channels = channels;            // mono/stereo
+    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;  // Hz
+    bytes = bitsPerSample / 8;                     // bytes/sec
+    wavfhdr.wavfmt.bytesPerSec =
+        bytes * channels * samplesPerSec;  // byte/サンプル*チャンネル
+    wavfhdr.wavfmt.blockAlign = bytes * channels;  // block_Size
+    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;  // 16 bit / sample
+    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));  // data
 
     sizeOfData = stereoL.size() * wavfhdr.wavfmt.blockAlign;
     wavfhdr.sizeOfData = sizeOfData;
@@ -404,59 +400,55 @@ void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, 
 /*--------------------------------------------------------------------------
  * Output Wave File
  */
-void Wave::OutputWave(const std::string app)
-{
+void Wave::OutputWave(const std::string app) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         int max;
         int mono, stereoL, stereoR;
         std::ofstream fout;
 
         if (wavfhdr.wavfmt.bitsPerSample == 8) {
             max = WAV_SIGNED_8BIT_MAX;
-        }
-        else if (wavfhdr.wavfmt.bitsPerSample == 16) {
+        } else if (wavfhdr.wavfmt.bitsPerSample == 16) {
             max = WAV_SIGNED_16BIT_MAX;
-        }
-        else if (wavfhdr.wavfmt.bitsPerSample == 24) {
+        } else if (wavfhdr.wavfmt.bitsPerSample == 24) {
             max = WAV_SIGNED_24BIT_MAX;
-        }
-        else {
+        } else {
             std::cerr << "error:bits per sample" << std::endl;
         }
 
         fout.open(app, std::ios::binary);
 
         // wav ヘッダ書き込み
-        fout.write((char*)&wavfhdr, sizeof(tagWaveFileHeader));
+        fout.write((char *)&wavfhdr, sizeof(tagWaveFileHeader));
 
         if (wavfhdr.wavfmt.channels == 1) {
-            for (unsigned int i = 0; i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
+            for (unsigned int i = 0;
+                 i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
                 mono = (monodata[i]) * max;
-                if (mono >= max)
-                    mono = max - 1;
-                if (mono <= -max)
-                    mono = -max + 1;
-                fout.write((char*)&mono, sizeof(char) * (wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels));
+                if (mono >= max) mono = max - 1;
+                if (mono <= -max) mono = -max + 1;
+                fout.write((char *)&mono,
+                           sizeof(char) * (wavfhdr.wavfmt.blockAlign /
+                                           wavfhdr.wavfmt.channels));
             }
-        }
-        else {
-            for (unsigned int i = 0; i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
+        } else {
+            for (unsigned int i = 0;
+                 i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
                 stereoL = ldata[i] * max;
                 stereoR = rdata[i] * max;
-                if (stereoL >= max)
-                    stereoL = max - 1;
-                if (stereoL <= -max)
-                    stereoL = -max + 1;
-                if (stereoR >= max)
-                    stereoR = max - 1;
-                if (stereoR <= -max)
-                    stereoR = -max + 1;
+                if (stereoL >= max) stereoL = max - 1;
+                if (stereoL <= -max) stereoL = -max + 1;
+                if (stereoR >= max) stereoR = max - 1;
+                if (stereoR <= -max) stereoR = -max + 1;
 
-                fout.write((char*)&stereoL, sizeof(char) * (wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels));
-                fout.write((char*)&stereoR, sizeof(char) * (wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels));
+                fout.write((char *)&stereoL,
+                           sizeof(char) * (wavfhdr.wavfmt.blockAlign /
+                                           wavfhdr.wavfmt.channels));
+                fout.write((char *)&stereoR,
+                           sizeof(char) * (wavfhdr.wavfmt.blockAlign /
+                                           wavfhdr.wavfmt.channels));
             }
         }
     }
@@ -465,16 +457,13 @@ void Wave::OutputWave(const std::string app)
 /*--------------------------------------------------------------------------
  * Stereo to Mono
  */
-void Wave::StereoToMono()
-{
+void Wave::StereoToMono() {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         if (channels == 1) {
             std::cout << "モノラルデータです." << std::endl;
-        }
-        else {
+        } else {
             monodata.resize(ldata.size());
             std::cout << "Stereo to Monoral." << std::endl;
             for (int i = 0; i < ldata.size(); i++) {
@@ -492,29 +481,23 @@ void Wave::StereoToMono()
 /*--------------------------------------------------------------------------
  * Normalize
  */
-void Wave::Normalize()
-{
+void Wave::Normalize() {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         double max = 0.0;
         double lmax = 0.0, rmax = 0.0;
         if (channels == 1) {
             for (int i = 0; i < monodata.size(); i++) {
-                if (max < fabs(monodata[i]))
-                    max = fabs(monodata[i]);
+                if (max < fabs(monodata[i])) max = fabs(monodata[i]);
             }
             for (int i = 0; i < monodata.size(); i++) {
                 monodata[i] /= max;
             }
-        }
-        else if (channels == 2) {
+        } else if (channels == 2) {
             for (int i = 0; i < ldata.size(); i++) {
-                if (lmax < fabs(ldata[i]))
-                    lmax = fabs(ldata[i]);
-                if (rmax < fabs(rdata[i]))
-                    rmax = fabs(rdata[i]);
+                if (lmax < fabs(ldata[i])) lmax = fabs(ldata[i]);
+                if (rmax < fabs(rdata[i])) rmax = fabs(rdata[i]);
             }
             if (lmax < rmax)
                 max = rmax;
@@ -531,8 +514,7 @@ void Wave::Normalize()
 /*--------------------------------------------------------------------------
  * Set FileName
  */
-void Wave::SetName(const std::string filename)
-{
+void Wave::SetName(const std::string filename) {
     wavename = filename;
     wavename += ".wav";
 }
@@ -540,12 +522,10 @@ void Wave::SetName(const std::string filename)
 /*--------------------------------------------------------------------------
  * Get Monoral Data
  */
-void Wave::GetData(std::vector<double>* mono)
-{
+void Wave::GetData(std::vector<double> *mono) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         if (channels == 1)
             *mono = monodata;
         else {
@@ -557,17 +537,14 @@ void Wave::GetData(std::vector<double>* mono)
 /*--------------------------------------------------------------------------
  * Get Stereo Data
  */
-void Wave::GetData(std::vector<double>* stereoL, std::vector<double>* stereoR)
-{
+void Wave::GetData(std::vector<double> *stereoL, std::vector<double> *stereoR) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         if (channels == 2) {
             *stereoL = ldata;
             *stereoR = rdata;
-        }
-        else {
+        } else {
             std::cerr << "Monoralです." << std::endl;
         }
     }
@@ -576,12 +553,10 @@ void Wave::GetData(std::vector<double>* stereoL, std::vector<double>* stereoR)
 /*--------------------------------------------------------------------------
  * Set Monoral Data
  */
-void Wave::SetData(const std::vector<double> mono)
-{
+void Wave::SetData(const std::vector<double> mono) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         ldata.clear();
         rdata.clear();
         monodata = mono;
@@ -593,12 +568,11 @@ void Wave::SetData(const std::vector<double> mono)
 /*--------------------------------------------------------------------------
  * Set Stereo Data
  */
-void Wave::SetData(const std::vector<double> stereoL, const std::vector<double> stereoR)
-{
+void Wave::SetData(const std::vector<double> stereoL,
+                   const std::vector<double> stereoR) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         monodata.clear();
         ldata = stereoL;
         rdata = stereoR;
@@ -610,12 +584,10 @@ void Wave::SetData(const std::vector<double> stereoL, const std::vector<double> 
 /*--------------------------------------------------------------------------
  * Resampling Wave for Sinc
  */
-void Wave::ResamplingSinc(const uint16_t resampling, const int sincLengthHarf)
-{
+void Wave::ResamplingSinc(const uint16_t resampling, const int sincLengthHarf) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
-    }
-    else {
+    } else {
         double pitch;
         int sincLength;
         double t;
@@ -633,7 +605,8 @@ void Wave::ResamplingSinc(const uint16_t resampling, const int sincLengthHarf)
             for (n = 0; n < mono.size(); n++) {
                 t = pitch * n;
                 offset = (int)t;
-                for (m = offset - (sincLength / 2); m <= offset + (sincLength / 2); m++) {
+                for (m = offset - (sincLength / 2);
+                     m <= offset + (sincLength / 2); m++) {
                     if (m >= 0 && m < monodata.size()) {
                         mono[n] += monodata[m] * Sinc(M_PI * (t - m));
                     }
@@ -643,15 +616,15 @@ void Wave::ResamplingSinc(const uint16_t resampling, const int sincLengthHarf)
             samplesPerSec = resampling;
             sizeOfData = mono.size() * wavfhdr.wavfmt.blockAlign;
             SetHeader();
-        }
-        else if (channels == 2) {
+        } else if (channels == 2) {
             stereoL.resize(ldata.size() / pitch);
             stereoR.resize(rdata.size() / pitch);
 
             for (n = 0; n < stereoL.size(); n++) {
                 t = pitch * n;
                 offset = (int)t;
-                for (m = offset - (sincLength / 2); m <= offset + (sincLength / 2); m++) {
+                for (m = offset - (sincLength / 2);
+                     m <= offset + (sincLength / 2); m++) {
                     if (m >= 0 && m < ldata.size()) {
                         stereoL[n] += ldata[m] * Sinc(M_PI * (offset - m));
                         stereoR[n] += rdata[m] * Sinc(M_PI * (offset - m));

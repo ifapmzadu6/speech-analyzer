@@ -1,8 +1,7 @@
 
 #include "util.h"
 
-std::vector<double> Util::GetInput(std::string path, int padding)
-{
+std::vector<double> Util::GetInput(std::string path, int padding) {
     std::cout << "- \"" + path + "\" -" << std::endl;
     Wave wav;
     if (wav.InputWave(path) != 0) {
@@ -23,9 +22,7 @@ std::vector<double> Util::GetInput(std::string path, int padding)
     return input;
 }
 
-std::vector<double>
-Util::NormalizeVector(std::vector<double> input)
-{
+std::vector<double> Util::NormalizeVector(std::vector<double> input) {
     double max = 0;
     for (int i = 0; i < input.size(); i++) {
         double value = input[i];
@@ -39,9 +36,8 @@ Util::NormalizeVector(std::vector<double> input)
     return input;
 }
 
-std::vector<std::vector<double> >
-Util::NormalizeVectors(std::vector<std::vector<double> > input)
-{
+std::vector<std::vector<double>> Util::NormalizeVectors(
+    std::vector<std::vector<double>> input) {
     for (int i = 0; i < input.size(); i++) {
         double max = 0;
         for (int j = 0; j < input[i].size(); j++) {
@@ -57,8 +53,8 @@ Util::NormalizeVectors(std::vector<std::vector<double> > input)
     return input;
 }
 
-std::vector<std::vector<double> > Util::NormalizeSummation(std::vector<std::vector<double> > input)
-{
+std::vector<std::vector<double>> Util::NormalizeSummation(
+    std::vector<std::vector<double>> input) {
     std::vector<double> sum;
     for (int i = 0; i < input.size(); i++) {
         double d = 0;
@@ -81,9 +77,8 @@ std::vector<std::vector<double> > Util::NormalizeSummation(std::vector<std::vect
     return input;
 }
 
-std::vector<double> Util::CopyVector(std::vector<double>& input, int begin,
-    int length)
-{
+std::vector<double> Util::CopyVector(std::vector<double> &input, int begin,
+                                     int length) {
     std::vector<double> vector;
     for (int j = 0; j < length; j++) {
         vector.push_back(input[begin + j]);
@@ -91,8 +86,8 @@ std::vector<double> Util::CopyVector(std::vector<double>& input, int begin,
     return vector;
 }
 
-std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, std::vector<double> vec)
-{
+std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input,
+                                                   std::vector<double> vec) {
     if (input.size() != vec.size()) {
         abort();
     }
@@ -101,7 +96,6 @@ std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, st
     double maxD = 0;
     int length = input.size();
     for (int i = 0; i < length; i++) {
-
         double d = 0;
         for (int j = 0; j < length; j++) {
             d += input[(i + j) % length] * vec[j];
@@ -114,13 +108,12 @@ std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, st
 
     std::vector<double> output;
     for (int i = 0; i < length; i++) {
-        output.push_back(input[(maxIndex + i) % length]);
+        output.push_back(input[(maxIndex + i) % (length - 4)]);
     }
     return output;
 }
 
-std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input)
-{
+std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input) {
     double first = input[0];
     double last = input[input.size() - 1];
     double ave = (first + last) / 2;
@@ -133,15 +126,15 @@ std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input)
 }
 
 // Julius
-std::vector<std::vector<double> >
-Util::GetSplittedDataByJulius(std::vector<double>& input, int samplingSize,
-    std::vector<JuliusResult>& juliusResults)
-{
-    std::vector<std::vector<double> > splitted;
+std::vector<std::vector<double>> Util::GetSplittedDataByJulius(
+    std::vector<double> &input, int samplingSize,
+    std::vector<JuliusResult> &juliusResults) {
+    std::vector<std::vector<double>> splitted;
     for (int i = 0; i < juliusResults.size(); i++) {
         int from = juliusResults[i].from * samplingSize;
         int to = juliusResults[i].to * samplingSize;
-        // std::cout << from << " " << to << " " << to - from << " " << result.unit
+        // std::cout << from << " " << to << " " << to - from << " " <<
+        // result.unit
         // << std::endl;
         std::vector<double> vector;
         for (int j = from; j < to; j++) {
@@ -150,4 +143,10 @@ Util::GetSplittedDataByJulius(std::vector<double>& input, int samplingSize,
         splitted.push_back(vector);
     }
     return splitted;
+}
+
+std::string Util::toString(int i) {
+    std::stringstream ss;
+    ss << i;
+    return ss.str();
 }

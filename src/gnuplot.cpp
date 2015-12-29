@@ -3,42 +3,42 @@
 #include "gnuplot.h"
 
 template <typename T>
-void Gnuplot<T>::Output(std::vector<T>& output, std::string title, const char* option)
-{
+void Gnuplot<T>::Output(std::vector<T> &output, std::string title,
+                        const char *option) {
     Output(output, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::Output(std::vector<T>& output, std::string title, const char* option, const char* filename)
-{
+void Gnuplot<T>::Output(std::vector<T> &output, std::string title,
+                        const char *option, const char *filename) {
     std::ofstream ofs(filename);
     for (int i = 0; i < output.size(); i++) {
         ofs << i << " " << output[i] << std::endl;
     }
     ofs.close();
 
-    FILE* gnuplot = popen("gnuplot", "w");
-    //fprintf(gnuplot, "set title \"%s\";", title);
+    FILE *gnuplot = popen("gnuplot", "w");
+    // fprintf(gnuplot, "set title \"%s\";", title);
     fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
     if (option == nullptr) {
         fprintf(gnuplot, "p \'%s\'", filename);
-    }
-    else {
+    } else {
         fprintf(gnuplot, "p \'%s\' %s", filename, option);
     }
     pclose(gnuplot);
 }
 
 template <typename T>
-void Gnuplot<T>::Output2D(std::vector<std::vector<T> >& outputs, std::string title, const char* option)
-{
+void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs,
+                          std::string title, const char *option) {
     Output2D(outputs, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::Output2D(std::vector<std::vector<T> >& outputs, std::string title, const char* option, const char* filename)
-{
+void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs,
+                          std::string title, const char *option,
+                          const char *filename) {
     std::ofstream ofs(filename);
 
     int maxCol = 0;
@@ -59,8 +59,8 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T> >& outputs, std::string tit
     }
     ofs.close();
 
-    FILE* gnuplot = popen("gnuplot", "w");
-    //fprintf(gnuplot, "set title \"%s\";", title);
+    FILE *gnuplot = popen("gnuplot", "w");
+    // fprintf(gnuplot, "set title \"%s\";", title);
     fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
     fprintf(gnuplot, "p ");
@@ -68,18 +68,16 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T> >& outputs, std::string tit
     if (maxCol == 1) {
         if (option == nullptr) {
             fprintf(gnuplot, "\'%s\'", filename);
-        }
-        else {
+        } else {
             fprintf(gnuplot, "\'%s\' %s", filename, option);
         }
-    }
-    else {
+    } else {
         for (int i = 0; i < outputs.size(); i++) {
             if (option == nullptr) {
                 fprintf(gnuplot, "\'%s\' u 1:%d", filename, i + 2);
-            }
-            else {
-                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2, option);
+            } else {
+                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2,
+                        option);
             }
             if (i < outputs.size() - 1) {
                 fprintf(gnuplot, ", ");
@@ -91,14 +89,14 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T> >& outputs, std::string tit
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize(std::vector<T>& output, std::string title, const char* option)
-{
+void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title,
+                               const char *option) {
     OutputCyclize(output, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize(std::vector<T>& output, std::string title, const char* option, const char* filename)
-{
+void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title,
+                               const char *option, const char *filename) {
     int count = 3;
 
     std::ofstream ofs(filename);
@@ -107,28 +105,28 @@ void Gnuplot<T>::OutputCyclize(std::vector<T>& output, std::string title, const 
     }
     ofs.close();
 
-    FILE* gnuplot = popen("gnuplot", "w");
-    //fprintf(gnuplot, "set title \"%s\";", title);
+    FILE *gnuplot = popen("gnuplot", "w");
+    // fprintf(gnuplot, "set title \"%s\";", title);
     fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
     if (option == nullptr) {
         fprintf(gnuplot, "p \'%s\'", filename);
-    }
-    else {
+    } else {
         fprintf(gnuplot, "p \'%s\' %s", filename, option);
     }
     pclose(gnuplot);
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T> >& outputs, std::string title, const char* option)
-{
+void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs,
+                                 std::string title, const char *option) {
     OutputCyclize2D(outputs, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T> >& outputs, std::string title, const char* option, const char* filename)
-{
+void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs,
+                                 std::string title, const char *option,
+                                 const char *filename) {
     int count = 3;
 
     int maxCol = 0;
@@ -151,8 +149,8 @@ void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T> >& outputs, std::str
     }
     ofs.close();
 
-    FILE* gnuplot = popen("gnuplot", "w");
-    //fprintf(gnuplot, "set title \"%s\";", title);
+    FILE *gnuplot = popen("gnuplot", "w");
+    // fprintf(gnuplot, "set title \"%s\";", title);
     fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
     fprintf(gnuplot, "unset key;");
     fprintf(gnuplot, "p ");
@@ -160,18 +158,16 @@ void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T> >& outputs, std::str
     if (maxCol == 1) {
         if (option == nullptr) {
             fprintf(gnuplot, "\'%s\'", filename);
-        }
-        else {
+        } else {
             fprintf(gnuplot, "\'%s\' %s", filename, option);
         }
-    }
-    else {
+    } else {
         for (int i = 0; i < outputs.size(); i++) {
             if (option == nullptr) {
                 fprintf(gnuplot, "\'%s\' u 1:%d", filename, i + 2);
-            }
-            else {
-                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2, option);
+            } else {
+                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2,
+                        option);
             }
             if (i < outputs.size() - 1) {
                 fprintf(gnuplot, ", ");

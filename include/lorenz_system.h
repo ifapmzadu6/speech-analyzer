@@ -1,9 +1,7 @@
-
-#ifndef lorenz_system_h
-#define lorenz_system_h
+#pragma once
 
 class LorenzSystem {
-public:
+   public:
     double x;
     double y;
     double z;
@@ -14,32 +12,25 @@ public:
 
     double dt = 0.02;
 
-    LorenzSystem()
-    {
+    LorenzSystem() {
         x = 3.584036031;
         y = 1.398178981;
         z = 25.08707469;
     }
 
-    LorenzSystem(double x, double y, double z)
-        : x(x)
-        , y(y)
-        , z(z)
-    {
+    LorenzSystem(double x, double y, double z) : x(x), y(y), z(z) {
         x = 3.584036031;
         y = 1.398178981;
         z = 25.08707469;
     }
 
-    void nextTime()
-    {
+    void nextTime() {
         x += dx(x, y, z);
         y += dy(x, y, z);
         z += dz(x, y, z);
     }
 
-    void nextTimeWithRungetta()
-    {
+    void nextTimeWithRungetta() {
         double k1_dx = dx(x, y, z);
         double k1_dy = dy(x, y, z);
         double k1_dz = dz(x, y, z);
@@ -61,24 +52,19 @@ public:
         z += (k1_dz + 2.0 * k2_dz + 2.0 * k3_dz + k4_dz) / 6.0;
     }
 
-private:
-    double dx(double x, double y, double z)
-    {
+   private:
+    double dx(double x, double y, double z) {
         double dx = (-p * x + p * y) * dt;
         return dx;
     }
 
-    double dy(double x, double y, double z)
-    {
+    double dy(double x, double y, double z) {
         double dy = (-x * z + r * x - y) * dt;
         return dy;
     }
 
-    double dz(double x, double y, double z)
-    {
+    double dz(double x, double y, double z) {
         double dz = (x * y - b * z) * dt;
         return dz;
     }
 };
-
-#endif

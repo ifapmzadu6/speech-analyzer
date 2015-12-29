@@ -28,7 +28,16 @@
 *.app
 
 # Output files
-output*
+output
+
+# Resource
+resource
+
+# Reserve
+reserve
+
+# Temp
+tmp
 
 # Mac
 .DS_Store

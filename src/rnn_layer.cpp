@@ -1,14 +1,16 @@
 #include "rnn_layer.h"
 
-void RnnLayer::setup()
-{
-    inWeights = std::vector<std::vector<double> >(midDim, std::vector<double>(inDim + 1, 0));
-    midWeights = std::vector<std::vector<double> >(midDim, std::vector<double>(midDim));
-    outWeights = std::vector<std::vector<double> >(outDim, std::vector<double>(midDim));
+void RnnLayer::setup() {
+    inWeights = std::vector<std::vector<double>>(
+        midDim, std::vector<double>(inDim + 1, 0));
+    midWeights =
+        std::vector<std::vector<double>>(midDim, std::vector<double>(midDim));
+    outWeights =
+        std::vector<std::vector<double>>(outDim, std::vector<double>(midDim));
 }
 
-void RnnLayer::forward_in(const std::vector<double>& in, const std::vector<double>& before)
-{
+void RnnLayer::forward_in(const std::vector<double> &in,
+                          const std::vector<double> &before) {
     std::vector<double> biased(inDim + 1);
     biased[0] = 1;
     for (int i = 1; i < inDim + 1; i++) {
@@ -39,8 +41,7 @@ void RnnLayer::forward_in(const std::vector<double>& in, const std::vector<doubl
     this->mid = mid;
 }
 
-std::vector<double> RnnLayer::forward_out()
-{
+std::vector<double> RnnLayer::forward_out() {
     std::vector<double> out(outDim);
     for (int i = 0; i < outDim; i++) {
         double d = 0;

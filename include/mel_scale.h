@@ -1,6 +1,4 @@
-
-#ifndef mel_scale_h
-#define mel_scale_h
+#pragma once
 
 #include <cmath>
 #include <string>
@@ -14,46 +12,39 @@ struct MelFilterBank {
 };
 
 class MelScale {
-public:
+   public:
     // Stevens & Volkman 1940; Beranek 1949; O’Shaughnessy 1987
-    static double hz2mel_stevens(double f)
-    {
+    static double hz2mel_stevens(double f) {
         return 1127.010480 * log(f / 700.0 + 1.0);
     }
 
-    static double mel2hz_stevens(double mel)
-    {
+    static double mel2hz_stevens(double mel) {
         return 700.0 * (exp(mel / 1127.010480) - 1.0);
     }
 
     // Fant 1968
-    static double hz2mel_fant(double f)
-    {
+    static double hz2mel_fant(double f) {
         return 1442.695041 * log(f / 1000.0 + 1.0);
     }
 
-    static double mel2hz_fant(double mel)
-    {
+    static double mel2hz_fant(double mel) {
         return 1000.0 * (exp(mel / 1442.695041) - 1.0);
     }
 
     // Lindsay & Norman 1977
-    static double hz2mel_lindsay(double f)
-    {
+    static double hz2mel_lindsay(double f) {
         return 1046.55994 * log(f / 625.0 + 1.0);
     }
 
-    static double mel2hz_lindsay(double mel)
-    {
+    static double mel2hz_lindsay(double mel) {
         return 625.0 * (exp(mel / 1046.55994) - 1.0);
     }
 
     /**
      * メルフィルタバンクを作成
      */
-    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft, int numChannels)
-    {
-
+    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft,
+                                                    int numChannels) {
         // ナイキスト周波数
         double fmax = fs / 2;
 
@@ -133,10 +124,10 @@ public:
     }
 
     /*
-     
+
      def melFilterBank(fs, nfft, numChannels):
      """メルフィルタバンクを作成"""
-     
+
      # ナイキスト周波数（Hz）
      fmax = fs / 2
      # ナイキスト周波数（mel）
@@ -156,7 +147,7 @@ public:
      indexstart = np.hstack(([0], indexcenter[0:numChannels - 1]))
      # 各フィルタの終了位置のインデックス
      indexstop = np.hstack((indexcenter[1:numChannels], [nmax]))
-     
+
      filterbank = np.zeros((numChannels, nmax))
      for c in np.arange(0, numChannels):
      # 三角フィルタの左の直線の傾きから点を求める
@@ -167,29 +158,28 @@ public:
      decrement = 1.0 / (indexstop[c] - indexcenter[c])
      for i in np.arange(indexcenter[c], indexstop[c]):
      filterbank[c, i] = 1.0 - ((i - indexcenter[c]) * decrement)
-     
+
      return filterbank, fcenters
-     
-     
-     
+
+
+
      # メルフィルタバンクを作成
      numChannels = 20  # メルフィルタバンクのチャネル数
      df = fs / nfft   # 周波数解像度（周波数インデックス1あたりのHz幅）
      filterbank, fcenters = melFilterBank(fs, nfft, numChannels)
-     
+
      # メルフィルタバンクのプロット
      for c in np.arange(0, numChannels):
      plot(np.arange(0, nfft / 2) * df, filterbank[c])
      savefig("melfilterbank.png")
      show()
-     
+
      */
 
-    static void plotMelFilterBank(double fs, double nfft, int numChannels)
-    {
-
+    static void plotMelFilterBank(double fs, double nfft, int numChannels) {
         MelScale a;
-        std::vector<MelFilterBank> melFilterBank = a.melFilterBank(fs, nfft, numChannels);
+        std::vector<MelFilterBank> melFilterBank =
+            a.melFilterBank(fs, nfft, numChannels);
 
         for (int k = 0; k < melFilterBank.size(); k++) {
             std::ofstream tmpstream("melfilter" + std::to_string(k));
@@ -209,5 +199,3 @@ public:
         system(pipe.c_str());
     }
 };
-
-#endif

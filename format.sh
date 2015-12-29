@@ -1,7 +1,5 @@
 #!/bin/bash
 
-clang-format -i -style=WebKit include/*.h
-clang-format -i -style=WebKit src/*.cpp
-
-
+clang-format -i -style='{BasedOnStyle: Google, IndentWidth: 4}' include/*.h
+clang-format -i -style='{BasedOnStyle: Google, IndentWidth: 4}' src/*.cpp
 
