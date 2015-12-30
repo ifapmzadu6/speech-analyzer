@@ -18,6 +18,8 @@
 #include "util.h"
 #include "findpeaks.h"
 
+
+
 struct UnitWave {
     std::string unit;
     std::string before;
@@ -37,6 +39,8 @@ UnitWave *enumurateJulius(
 
 // Clustering
 void showClustering(std::vector<double> &input, int samplingSize);
+
+
 
 int main() {
 
@@ -66,15 +70,21 @@ int main() {
                 Util::MiximizeCrossCorrelation(waves[j], bestWave);
             vec = Util::ZerofyFirstAndLast(vec);
             org.push_back(vec);
-
-            //org.push_back(waves[j]);
         }
 
         // 面積で正則化
         // org = Util::NormalizeSummation(org);
-        // org = Util::NormalizeVectors(org);
+        org = Util::NormalizeVectors(org);
         if (true) {
-            Gnuplot<double>::Output2D(org, title, "w l lc rgb '#E0FF0000'");
+            int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(org);
+            std::vector<std::vector<double>> vecs;
+            for (int j=0; j<org.size(); j++) {
+                vecs.push_back(org[j]);
+            }
+            for (int j=0; j<10; j++) {
+                vecs.push_back(org[bestIndex]);
+            }
+            Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'");
         }
 
         if (false) {

@@ -114,15 +114,42 @@ std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input,
 }
 
 std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input) {
-    double first = input[0];
-    double last = input[input.size() - 1];
-    double ave = (first + last) / 2;
-    std::vector<double> output;
-    for (int i = 0; i < input.size(); i++) {
-        double val = input[i] - ave;
-        output.push_back(val);
+    int size = input.size();
+    double ave = (input[0] + input[size-1]) / 2;
+    for (int i=0; i<size; i++) {
+        input[i] -= ave;
     }
-    return output;
+
+    int fixSize = 5;
+    int begin = 0;
+    for (int i=0; i<fixSize; i++) {
+        /*
+        if (input[i] * input[i+1] < 0) {
+            double zero = i - input[i] / (input[i+1] - input[i]);
+            std::cout << "zero = " << zero << std::endl;
+        }
+        */
+        if (input[i] == 0 || input[i] * input[i+1] < 0) {
+            begin = i;
+            break;
+        }
+    }
+    int end = size;
+    for (int i=0; i<fixSize; i++) {
+        /*
+        if (input[size-1-i] * input[size-1-i-1] < 0) {
+            double zero = size-1-i - input[size-1-i-1] / (input[size-1-i] - input[size-1-i-1]);
+            std::cout << "zeroend = " << zero << std::endl;
+        }
+        */
+        if (input[size-1-i] == 0 || input[size-1-i] * input[size-1-i-1] < 0) {
+            end = size-i;
+            break;
+        }
+    }
+    
+    std::vector<double> vec = CopyVector(input, begin, end - begin);
+    return LinearInterpolation::convert(vec, size);
 }
 
 // Julius

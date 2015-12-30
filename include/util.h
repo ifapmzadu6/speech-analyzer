@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "julius_importer.h"
+#include "linear_interpolation.h"
 #include "wave.h"
 
 class Util {
