@@ -18,8 +18,6 @@
 #include "util.h"
 #include "findpeaks.h"
 
-
-
 struct UnitWave {
     std::string unit;
     std::string before;
@@ -40,10 +38,7 @@ UnitWave *enumurateJulius(
 // Clustering
 void showClustering(std::vector<double> &input, int samplingSize);
 
-
-
 int main() {
-
     int samplingSize = 16000;
     std::vector<UnitWave> unitWaves = getUnitWaves(samplingSize);
     std::vector<std::vector<UnitWave>> tryphones = getTryphones(unitWaves);
@@ -78,10 +73,10 @@ int main() {
         if (true) {
             int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(org);
             std::vector<std::vector<double>> vecs;
-            for (int j=0; j<org.size(); j++) {
+            for (int j = 0; j < org.size(); j++) {
                 vecs.push_back(org[j]);
             }
-            for (int j=0; j<10; j++) {
+            for (int j = 0; j < 10; j++) {
                 vecs.push_back(org[bestIndex]);
             }
             Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'");
@@ -198,17 +193,17 @@ UnitWave *enumurateJulius(
             firstPeak = peaks[i];
         }
     }
-    firstPeak = std::max(firstPeak-50, 0);
+    firstPeak = std::max(firstPeak - 50, 0);
 
     int targetSize = 140;
     int errorSize = 40;
-    std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(julius, samplingSize, firstPeak,
-                                               targetSize - errorSize,
-                                               targetSize + errorSize);
+    std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(
+        julius, samplingSize, firstPeak, targetSize - errorSize,
+        targetSize + errorSize);
     if (cycles.size() < 3) {
         return nullptr;
     }
-    //std::cout << "cycles.size() -> " << cycles.size() << std::endl;
+    // std::cout << "cycles.size() -> " << cycles.size() << std::endl;
 
     // 先頭の波を利用する
     int maxLength = -1;
@@ -227,7 +222,7 @@ UnitWave *enumurateJulius(
         // 一定の条件以下では除外する
         // 面積
         double s = 0;
-        for (int i=0; i<inputCycle.size(); i++) {
+        for (int i = 0; i < inputCycle.size(); i++) {
             s += fabs(inputCycle[i]);
         }
         if (s > 20) {
