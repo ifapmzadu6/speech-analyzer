@@ -2,9 +2,9 @@
 #include "voice_wave_analyzer.h"
 
 std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
-    const std::vector<double> &input, int samplingFrequency, int minLength,
-    int maxLength) {
-    std::cout << "- Cycles -" << std::endl;
+    const std::vector<double> &input, int samplingFrequency, int initIndex,
+    int minLength, int maxLength) {
+    // std::cout << "- Cycles -" << std::endl;
 
     int inputSize = input.size();  // 入力のサンプル数
 
@@ -13,7 +13,7 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
 
     // 入力を探索し、それぞれの相関関数を求め、
     // 最大となる（波形が似ている）箇所を探し、保存していく。
-    int index = 0;
+    int index = initIndex;
     std::vector<int> indexes;
     while (index + maxLength + dsize < inputSize) {
         double maxR = std::numeric_limits<double>::min();
@@ -55,9 +55,11 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
     }
 
     if (fixedIndexes.size() > 0 && indexes.size() > 0) {
+        /*
         std::cout << "zero detection rate: "
                   << 100.0 * fixedIndexes.size() / indexes.size() << "%"
                   << std::endl;
+                  */
     } else {
         std::cout << "no results" << std::endl;
         return std::vector<Cycle>();
@@ -73,9 +75,11 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(
             cycles.push_back(cycle);
         }
     }
+    /*
     std::cout << "correct data rate : "
               << 100.0 * cycles.size() / fixedIndexes.size() << "%"
               << std::endl;
+              */
 
     return cycles;
 }

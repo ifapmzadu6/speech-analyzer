@@ -16,6 +16,7 @@
 #include "linear_interpolation.h"
 #include "kernel_density_estimation.h"
 #include "util.h"
+#include "findpeaks.h"
 
 struct UnitWave {
     std::string unit;
@@ -38,6 +39,7 @@ UnitWave *enumurateJulius(
 void showClustering(std::vector<double> &input, int samplingSize);
 
 int main() {
+
     int samplingSize = 16000;
     std::vector<UnitWave> unitWaves = getUnitWaves(samplingSize);
     std::vector<std::vector<UnitWave>> tryphones = getTryphones(unitWaves);
@@ -60,13 +62,12 @@ int main() {
         std::vector<double> bestWave = waves[defaultIndex];
         std::vector<std::vector<double>> org;
         for (int j = 0; j < waves.size(); j++) {
-            /*
             std::vector<double> vec =
                 Util::MiximizeCrossCorrelation(waves[j], bestWave);
             vec = Util::ZerofyFirstAndLast(vec);
             org.push_back(vec);
-            */
-            org.push_back(waves[j]);
+
+            //org.push_back(waves[j]);
         }
 
         // 面積で正則化
@@ -176,14 +177,28 @@ UnitWave *enumurateJulius(
 
     std::vector<double> julius = splittedDataByJulius[indexOfJulius];
 
+    std::vector<int> peaks = FindPeaks<double>::finds(julius);
+    int firstPeak = 0;
+    double minValue = 100;
+    for (int i = 0; i < peaks.size(); i++) {
+        int range = julius.size() / 5;
+        double value = pow(1 - julius[peaks[i]], 2) + pow(peaks[i] / range, 2);
+        if (peaks[i] < range && minValue > value) {
+            minValue = value;
+            firstPeak = peaks[i];
+        }
+    }
+    firstPeak = std::max(firstPeak-50, 0);
+
     int targetSize = 140;
     int errorSize = 40;
-    auto cycles = VoiceWaveAnalyzer::GetCycles(
-        julius, samplingSize, targetSize - errorSize, targetSize + errorSize);
+    std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(julius, samplingSize, firstPeak,
+                                               targetSize - errorSize,
+                                               targetSize + errorSize);
     if (cycles.size() < 3) {
         return nullptr;
     }
-    std::cout << "cycles.size() -> " << cycles.size() << std::endl;
+    //std::cout << "cycles.size() -> " << cycles.size() << std::endl;
 
     // 先頭の波を利用する
     int maxLength = -1;
@@ -199,7 +214,18 @@ UnitWave *enumurateJulius(
             Util::CopyVector(julius, cycles[i].index, cycles[i].length);
         // 波形の長さを揃える
         inputCycle = LinearInterpolation::convert(inputCycle, maxLength);
-        inputCycles.push_back(inputCycle);
+        // 一定の条件以下では除外する
+        // 面積
+        double s = 0;
+        for (int i=0; i<inputCycle.size(); i++) {
+            s += fabs(inputCycle[i]);
+        }
+        if (s > 20) {
+            inputCycles.push_back(inputCycle);
+        }
+    }
+    if (inputCycles.size() == 0) {
+        return nullptr;
     }
     if (false) {
         Gnuplot<double>::Output2D(inputCycles, gnuplotSubtitle + "inputCycles",
@@ -282,7 +308,7 @@ void showClustering(std::vector<double> &input, int samplingSize) {
     int targetSize = 140;
     int errorSize = 70;
     std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(
-        input, samplingSize, targetSize - errorSize, targetSize + errorSize);
+        input, samplingSize, 0, targetSize - errorSize, targetSize + errorSize);
     std::cout << "cycles.size() -> " << cycles.size() << std::endl;
     if (cycles.size() < 3) {
         return;
