@@ -105,29 +105,21 @@ const int Wave::ReadfmtChunk(std::ifstream *fin) {
         exit(0);
     }
 
-    std::cout << "    formatTag: " << wavfmtpcm.formatTag << " (1 = PCM)"
-              << std::endl;
-    std::cout << "    channels: " << wavfmtpcm.channels << "[channel]"
-              << std::endl;
-    std::cout << "    samplesPerSec: " << wavfmtpcm.samplesPerSec << "[Hz]"
-              << std::endl;
-    std::cout << "    bitsPerSample: " << wavfmtpcm.bitsPerSample
-              << "[bits/sample]" << std::endl;
+    std::cout << "    formatTag: " << wavfmtpcm.formatTag << " (1 = PCM)" << std::endl;
+    std::cout << "    channels: " << wavfmtpcm.channels << "[channel]" << std::endl;
+    std::cout << "    samplesPerSec: " << wavfmtpcm.samplesPerSec << "[Hz]" << std::endl;
+    std::cout << "    bitsPerSample: " << wavfmtpcm.bitsPerSample << "[bits/sample]" << std::endl;
 
     if (wavfmtpcm.formatTag != 1) {
-        std::cerr << "\nこのプログラムは無圧縮PCMのみを対象とします."
-                  << std::endl;
-        std::cerr << "このwavファイルの形式は " << wavfmtpcm.formatTag
-                  << " です." << std::endl;
+        std::cerr << "\nこのプログラムは無圧縮PCMのみを対象とします." << std::endl;
+        std::cerr << "このwavファイルの形式は " << wavfmtpcm.formatTag << " です." << std::endl;
         return -1;
     }
-    if (wavfmtpcm.bitsPerSample != 8 && wavfmtpcm.bitsPerSample != 16 &&
-        wavfmtpcm.bitsPerSample != 24 && wavfmtpcm.bitsPerSample != 32) {
+    if (wavfmtpcm.bitsPerSample != 8 && wavfmtpcm.bitsPerSample != 16 && wavfmtpcm.bitsPerSample != 24 && wavfmtpcm.bitsPerSample != 32) {
         std::cerr << "\nこのプログラムは8/16/"
                      "24ビットサンプリングされたものを対象とします."
                   << std::endl;
-        std::cerr << "このwavファイルの bits/secは " << wavfmtpcm.bitsPerSample
-                  << " です." << std::endl;
+        std::cerr << "このwavファイルの bits/secは " << wavfmtpcm.bitsPerSample << " です." << std::endl;
         return -1;
     }
 
@@ -297,30 +289,26 @@ int Wave::Dump24BitMonoWave() {
 void Wave::SetHeader() {
     uint16_t bytes;
 
-    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));  // RIFF
-    wavfhdr.sizeOfFile =
-        sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
-    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));  // WAVE
-    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));     // fmt
-    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;     // sizeof( PCMWAVEFORMAT )
-    wavfhdr.wavfmt.formatTag = 1;                  // WAVE_FORMAT_PCM
-    wavfhdr.wavfmt.channels = channels;            // mono/stereo
-    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;  // Hz
-    bytes = bitsPerSample / 8;                     // bytes/sec
-    wavfhdr.wavfmt.bytesPerSec =
-        bytes * channels * samplesPerSec;  // byte/サンプル*チャンネル
-    wavfhdr.wavfmt.blockAlign = bytes * channels;  // block_Size
-    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;  // 16 bit / sample
-    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));  // data
-    wavfhdr.sizeOfData = sizeOfData;  // データ長 (byte)
+    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));       // RIFF
+    wavfhdr.sizeOfFile = sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
+    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));       // WAVE
+    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));          // fmt
+    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;                        // sizeof( PCMWAVEFORMAT )
+    wavfhdr.wavfmt.formatTag = 1;                                     // WAVE_FORMAT_PCM
+    wavfhdr.wavfmt.channels = channels;                               // mono/stereo
+    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;                     // Hz
+    bytes = bitsPerSample / 8;                                        // bytes/sec
+    wavfhdr.wavfmt.bytesPerSec = bytes * channels * samplesPerSec;    // byte/サンプル*チャンネル
+    wavfhdr.wavfmt.blockAlign = bytes * channels;                     // block_Size
+    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;                     // 16 bit / sample
+    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));       // data
+    wavfhdr.sizeOfData = sizeOfData;                                  // データ長 (byte)
 }
 
 /*--------------------------------------------------------------------------
  * CreateWaveClass Mono
  */
-void Wave::CreateWave(const std::vector<double> mono,
-                      const uint16_t samples_per_sec,
-                      const uint16_t bits_per_sample) {
+void Wave::CreateWave(const std::vector<double> mono, const uint16_t samples_per_sec, const uint16_t bits_per_sample) {
     monodata.clear();
     ldata.clear();
     rdata.clear();
@@ -331,21 +319,19 @@ void Wave::CreateWave(const std::vector<double> mono,
     samplesPerSec = samples_per_sec;
     bitsPerSample = bits_per_sample;
 
-    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));  // RIFF
-    wavfhdr.sizeOfFile =
-        sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
-    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));  // WAVE
-    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));     // fmt
-    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;     // sizeof( PCMWAVEFORMAT )
-    wavfhdr.wavfmt.formatTag = 1;                  // WAVE_FORMAT_PCM
-    wavfhdr.wavfmt.channels = channels;            // mono/stereo
-    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;  // Hz
-    bytes = bitsPerSample / 8;                     // bytes/sec
-    wavfhdr.wavfmt.bytesPerSec =
-        bytes * channels * samplesPerSec;  // byte/サンプル*チャンネル
-    wavfhdr.wavfmt.blockAlign = bytes * channels;  // block_Size
-    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;  // 16 bit / sample
-    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));  // data
+    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));       // RIFF
+    wavfhdr.sizeOfFile = sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
+    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));       // WAVE
+    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));          // fmt
+    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;                        // sizeof( PCMWAVEFORMAT )
+    wavfhdr.wavfmt.formatTag = 1;                                     // WAVE_FORMAT_PCM
+    wavfhdr.wavfmt.channels = channels;                               // mono/stereo
+    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;                     // Hz
+    bytes = bitsPerSample / 8;                                        // bytes/sec
+    wavfhdr.wavfmt.bytesPerSec = bytes * channels * samplesPerSec;    // byte/サンプル*チャンネル
+    wavfhdr.wavfmt.blockAlign = bytes * channels;                     // block_Size
+    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;                     // 16 bit / sample
+    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));       // data
 
     sizeOfData = mono.size() * wavfhdr.wavfmt.blockAlign;
     wavfhdr.sizeOfData = sizeOfData;
@@ -355,9 +341,7 @@ void Wave::CreateWave(const std::vector<double> mono,
 /*--------------------------------------------------------------------------
  * CreateWaveClass stereo
  */
-void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR,
-                      const uint16_t samples_per_sec,
-                      const uint16_t bits_per_sample) {
+void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, const uint16_t samples_per_sec, const uint16_t bits_per_sample) {
     monodata.clear();
     ldata.clear();
     rdata.clear();
@@ -376,21 +360,19 @@ void Wave::CreateWave(std::vector<double> stereoL, std::vector<double> stereoR,
     samplesPerSec = samples_per_sec;
     bitsPerSample = bits_per_sample;
 
-    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));  // RIFF
-    wavfhdr.sizeOfFile =
-        sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
-    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));  // WAVE
-    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));     // fmt
-    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;     // sizeof( PCMWAVEFORMAT )
-    wavfhdr.wavfmt.formatTag = 1;                  // WAVE_FORMAT_PCM
-    wavfhdr.wavfmt.channels = channels;            // mono/stereo
-    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;  // Hz
-    bytes = bitsPerSample / 8;                     // bytes/sec
-    wavfhdr.wavfmt.bytesPerSec =
-        bytes * channels * samplesPerSec;  // byte/サンプル*チャンネル
-    wavfhdr.wavfmt.blockAlign = bytes * channels;  // block_Size
-    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;  // 16 bit / sample
-    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));  // data
+    memcpy(wavfhdr.hdrRiff, STR_RIFF, sizeof(wavfhdr.hdrRiff));       // RIFF
+    wavfhdr.sizeOfFile = sizeOfData + sizeof(tagWaveFileHeader) - 8;  // ファイルサイズ
+    memcpy(wavfhdr.hdrWave, STR_WAVE, sizeof(wavfhdr.hdrWave));       // WAVE
+    memcpy(wavfhdr.hdrFmt, STR_fmt, sizeof(wavfhdr.hdrFmt));          // fmt
+    wavfhdr.sizeOfFmt = sizeof wavfhdr.wavfmt;                        // sizeof( PCMWAVEFORMAT )
+    wavfhdr.wavfmt.formatTag = 1;                                     // WAVE_FORMAT_PCM
+    wavfhdr.wavfmt.channels = channels;                               // mono/stereo
+    wavfhdr.wavfmt.samplesPerSec = samplesPerSec;                     // Hz
+    bytes = bitsPerSample / 8;                                        // bytes/sec
+    wavfhdr.wavfmt.bytesPerSec = bytes * channels * samplesPerSec;    // byte/サンプル*チャンネル
+    wavfhdr.wavfmt.blockAlign = bytes * channels;                     // block_Size
+    wavfhdr.wavfmt.bitsPerSample = bitsPerSample;                     // 16 bit / sample
+    memcpy(wavfhdr.hdrData, STR_data, sizeof(wavfhdr.hdrData));       // data
 
     sizeOfData = stereoL.size() * wavfhdr.wavfmt.blockAlign;
     wavfhdr.sizeOfData = sizeOfData;
@@ -424,18 +406,14 @@ void Wave::OutputWave(const std::string app) {
         fout.write((char *)&wavfhdr, sizeof(tagWaveFileHeader));
 
         if (wavfhdr.wavfmt.channels == 1) {
-            for (unsigned int i = 0;
-                 i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
+            for (unsigned int i = 0; i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
                 mono = (monodata[i]) * max;
                 if (mono >= max) mono = max - 1;
                 if (mono <= -max) mono = -max + 1;
-                fout.write((char *)&mono,
-                           sizeof(char) * (wavfhdr.wavfmt.blockAlign /
-                                           wavfhdr.wavfmt.channels));
+                fout.write((char *)&mono, sizeof(char) * (wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels));
             }
         } else {
-            for (unsigned int i = 0;
-                 i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
+            for (unsigned int i = 0; i < wavfhdr.sizeOfData / wavfhdr.wavfmt.blockAlign; i++) {
                 stereoL = ldata[i] * max;
                 stereoR = rdata[i] * max;
                 if (stereoL >= max) stereoL = max - 1;
@@ -443,12 +421,8 @@ void Wave::OutputWave(const std::string app) {
                 if (stereoR >= max) stereoR = max - 1;
                 if (stereoR <= -max) stereoR = -max + 1;
 
-                fout.write((char *)&stereoL,
-                           sizeof(char) * (wavfhdr.wavfmt.blockAlign /
-                                           wavfhdr.wavfmt.channels));
-                fout.write((char *)&stereoR,
-                           sizeof(char) * (wavfhdr.wavfmt.blockAlign /
-                                           wavfhdr.wavfmt.channels));
+                fout.write((char *)&stereoL, sizeof(char) * (wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels));
+                fout.write((char *)&stereoR, sizeof(char) * (wavfhdr.wavfmt.blockAlign / wavfhdr.wavfmt.channels));
             }
         }
     }
@@ -568,8 +542,7 @@ void Wave::SetData(const std::vector<double> mono) {
 /*--------------------------------------------------------------------------
  * Set Stereo Data
  */
-void Wave::SetData(const std::vector<double> stereoL,
-                   const std::vector<double> stereoR) {
+void Wave::SetData(const std::vector<double> stereoL, const std::vector<double> stereoR) {
     if (flag == false) {
         std::cerr << "Please Create or Input Wave." << std::endl;
     } else {
@@ -605,8 +578,7 @@ void Wave::ResamplingSinc(const uint16_t resampling, const int sincLengthHarf) {
             for (n = 0; n < mono.size(); n++) {
                 t = pitch * n;
                 offset = (int)t;
-                for (m = offset - (sincLength / 2);
-                     m <= offset + (sincLength / 2); m++) {
+                for (m = offset - (sincLength / 2); m <= offset + (sincLength / 2); m++) {
                     if (m >= 0 && m < monodata.size()) {
                         mono[n] += monodata[m] * Sinc(M_PI * (t - m));
                     }
@@ -623,8 +595,7 @@ void Wave::ResamplingSinc(const uint16_t resampling, const int sincLengthHarf) {
             for (n = 0; n < stereoL.size(); n++) {
                 t = pitch * n;
                 offset = (int)t;
-                for (m = offset - (sincLength / 2);
-                     m <= offset + (sincLength / 2); m++) {
+                for (m = offset - (sincLength / 2); m <= offset + (sincLength / 2); m++) {
                     if (m >= 0 && m < ldata.size()) {
                         stereoL[n] += ldata[m] * Sinc(M_PI * (offset - m));
                         stereoR[n] += rdata[m] * Sinc(M_PI * (offset - m));

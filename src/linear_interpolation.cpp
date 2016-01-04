@@ -1,8 +1,7 @@
 
 #include "linear_interpolation.h"
 
-std::vector<double> LinearInterpolation::convert(std::vector<double> &input,
-                                                 int toCycle) {
+std::vector<double> LinearInterpolation::convert(std::vector<double> &input, int toCycle) {
     int fromCycle = input.size();
     std::vector<double> output;
     for (int i = 0; i < toCycle; i++) {

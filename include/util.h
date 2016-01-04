@@ -16,26 +16,23 @@ class Util {
 
     static std::vector<double> NormalizeVector(std::vector<double> input);
 
-    static std::vector<std::vector<double>> NormalizeVectors(
-        std::vector<std::vector<double>> input);
+    static std::vector<std::vector<double>> NormalizeVectors(std::vector<std::vector<double>> input);
 
-    static std::vector<std::vector<double>> NormalizeSummation(
-        std::vector<std::vector<double>> input);
+    static std::vector<std::vector<double>> NormalizeSummation(std::vector<std::vector<double>> input);
 
-    static std::vector<double> CopyVector(std::vector<double> &input, int begin,
-                                          int length);
+    static std::vector<double> CopyVector(std::vector<double> &input, int begin, int length);
 
     // 相関関数が最大になるように入力のズレを修正
-    static std::vector<double> MiximizeCrossCorrelation(
-        std::vector<double> input, std::vector<double> vec);
+    static std::vector<double> MiximizeCrossCorrelation(std::vector<double> input, std::vector<double> vec);
+
+    // 相関関数の値の配列を取得する
+    static std::vector<double> GetCrossCorrelation(std::vector<double> input, std::vector<double> vec);
 
     // 入力の前後を0に近づける
     static std::vector<double> ZerofyFirstAndLast(std::vector<double> input);
 
     // Julius
-    static std::vector<std::vector<double>> GetSplittedDataByJulius(
-        std::vector<double> &input, int samplingSize,
-        std::vector<JuliusResult> &juliusResults);
+    static std::vector<std::vector<double>> GetSplittedDataByJulius(std::vector<double> &input, int samplingSize, std::vector<JuliusResult> &juliusResults);
 
     static std::string toString(int i);
 };

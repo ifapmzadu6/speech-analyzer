@@ -14,37 +14,24 @@ struct MelFilterBank {
 class MelScale {
    public:
     // Stevens & Volkman 1940; Beranek 1949; O’Shaughnessy 1987
-    static double hz2mel_stevens(double f) {
-        return 1127.010480 * log(f / 700.0 + 1.0);
-    }
+    static double hz2mel_stevens(double f) { return 1127.010480 * log(f / 700.0 + 1.0); }
 
-    static double mel2hz_stevens(double mel) {
-        return 700.0 * (exp(mel / 1127.010480) - 1.0);
-    }
+    static double mel2hz_stevens(double mel) { return 700.0 * (exp(mel / 1127.010480) - 1.0); }
 
     // Fant 1968
-    static double hz2mel_fant(double f) {
-        return 1442.695041 * log(f / 1000.0 + 1.0);
-    }
+    static double hz2mel_fant(double f) { return 1442.695041 * log(f / 1000.0 + 1.0); }
 
-    static double mel2hz_fant(double mel) {
-        return 1000.0 * (exp(mel / 1442.695041) - 1.0);
-    }
+    static double mel2hz_fant(double mel) { return 1000.0 * (exp(mel / 1442.695041) - 1.0); }
 
     // Lindsay & Norman 1977
-    static double hz2mel_lindsay(double f) {
-        return 1046.55994 * log(f / 625.0 + 1.0);
-    }
+    static double hz2mel_lindsay(double f) { return 1046.55994 * log(f / 625.0 + 1.0); }
 
-    static double mel2hz_lindsay(double mel) {
-        return 625.0 * (exp(mel / 1046.55994) - 1.0);
-    }
+    static double mel2hz_lindsay(double mel) { return 625.0 * (exp(mel / 1046.55994) - 1.0); }
 
     /**
      * メルフィルタバンクを作成
      */
-    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft,
-                                                    int numChannels) {
+    static std::vector<MelFilterBank> melFilterBank(double fs, double nfft, int numChannels) {
         // ナイキスト周波数
         double fmax = fs / 2;
 
@@ -178,8 +165,7 @@ class MelScale {
 
     static void plotMelFilterBank(double fs, double nfft, int numChannels) {
         MelScale a;
-        std::vector<MelFilterBank> melFilterBank =
-            a.melFilterBank(fs, nfft, numChannels);
+        std::vector<MelFilterBank> melFilterBank = a.melFilterBank(fs, nfft, numChannels);
 
         for (int k = 0; k < melFilterBank.size(); k++) {
             std::ofstream tmpstream("melfilter" + std::to_string(k));

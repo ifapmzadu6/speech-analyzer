@@ -36,7 +36,7 @@ struct tagHeader {
 
 struct tagChunk {
     unsigned char hdrFmtData[4];  // 'fmt ' or 'data'
-    unsigned int sizeOfFmtData;  // sizeof(PCMWAVEFORMAT) or Waveデーターサイズ
+    unsigned int sizeOfFmtData;   // sizeof(PCMWAVEFORMAT) or Waveデーターサイズ
 };
 
 #pragma pack(1)
@@ -86,8 +86,7 @@ class Wave {
     // Read Text File *
     int InputText(const std::string filename);
     // Output Wave
-    void OutputWave(
-        const std::string app = AppOutName /*appendname(default _out)*/);
+    void OutputWave(const std::string app = AppOutName /*appendname(default _out)*/);
     // Output txt *
     // void OutputText();
 
@@ -97,16 +96,11 @@ class Wave {
     // Set MonoData
     void SetData(const std::vector<double> mono);
     // Set StereoData
-    void SetData(const std::vector<double> stereoL,
-                 const std::vector<double> stereoR);
+    void SetData(const std::vector<double> stereoL, const std::vector<double> stereoR);
     // Create Mono Wave
-    void CreateWave(const std::vector<double> mono,
-                    const uint16_t samples_per_sec = WAV_DEFAULT_SPS,
-                    const uint16_t bits_per_sample = WAV_DEFAULT_BPS);
+    void CreateWave(const std::vector<double> mono, const uint16_t samples_per_sec = WAV_DEFAULT_SPS, const uint16_t bits_per_sample = WAV_DEFAULT_BPS);
     // Create Stereo Wave
-    void CreateWave(std::vector<double> stereoL, std::vector<double> stereoR,
-                    const uint16_t samples_per_sec = WAV_DEFAULT_SPS,
-                    const uint16_t bits_per_sample = WAV_DEFAULT_BPS);
+    void CreateWave(std::vector<double> stereoL, std::vector<double> stereoR, const uint16_t samples_per_sec = WAV_DEFAULT_SPS, const uint16_t bits_per_sample = WAV_DEFAULT_BPS);
 
     // EDIT
     // Stereo to Mono

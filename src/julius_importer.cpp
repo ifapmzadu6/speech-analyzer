@@ -23,8 +23,7 @@ std::vector<JuliusResult> JuliusImporter::getJuliusResults() {
     return results;
 };
 
-std::vector<std::string> JuliusImporter::split(const std::string &str,
-                                               char delim) {
+std::vector<std::string> JuliusImporter::split(const std::string &str, char delim) {
     std::vector<std::string> res;
     size_t current = 0, found;
     while ((found = str.find_first_of(delim, current)) != std::string::npos) {

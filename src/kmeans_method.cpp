@@ -5,18 +5,14 @@
 
 #include "kmeans_method.h"
 
-KMeansMethodResult KMeansMethod::Clustering(
-    const std::vector<std::vector<double>> &inputs, int dim,
-    int countOfCluster) {
+KMeansMethodResult KMeansMethod::Clustering(const std::vector<std::vector<double>> &inputs, int dim, int countOfCluster) {
     int size = inputs.size();
-    std::vector<std::vector<double>> clusters(countOfCluster,
-                                              std::vector<double>(dim, 0));
+    std::vector<std::vector<double>> clusters(countOfCluster, std::vector<double>(dim, 0));
 
     std::cout << "- Clustering -" << std::endl;
 
     // kMeans法++で初期値を決定
-    std::vector<int> clusterOfInputs =
-        getInitialClusterOfInputs(inputs, dim, countOfCluster);
+    std::vector<int> clusterOfInputs = getInitialClusterOfInputs(inputs, dim, countOfCluster);
     std::cout << "initialized" << std::endl;
 
     while (true) {
@@ -108,9 +104,7 @@ KMeansMethodResult KMeansMethod::Clustering(
     return result;
 }
 
-std::vector<int> KMeansMethod::getInitialClusterOfInputs(
-    const std::vector<std::vector<double>> &inputs, int dim,
-    int countOfCluster) {
+std::vector<int> KMeansMethod::getInitialClusterOfInputs(const std::vector<std::vector<double>> &inputs, int dim, int countOfCluster) {
     // メルセンヌツイスタの初期化
     std::random_device random_device;
     std::mt19937 mt(random_device());

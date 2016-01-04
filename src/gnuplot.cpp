@@ -3,14 +3,12 @@
 #include "gnuplot.h"
 
 template <typename T>
-void Gnuplot<T>::Output(std::vector<T> &output, std::string title,
-                        const char *option) {
+void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *option) {
     Output(output, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::Output(std::vector<T> &output, std::string title,
-                        const char *option, const char *filename) {
+void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *option, const char *filename) {
     std::ofstream ofs(filename);
     for (int i = 0; i < output.size(); i++) {
         ofs << i << " " << output[i] << std::endl;
@@ -30,15 +28,12 @@ void Gnuplot<T>::Output(std::vector<T> &output, std::string title,
 }
 
 template <typename T>
-void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs,
-                          std::string title, const char *option) {
+void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option) {
     Output2D(outputs, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs,
-                          std::string title, const char *option,
-                          const char *filename) {
+void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option, const char *filename) {
     std::ofstream ofs(filename);
 
     int maxCol = 0;
@@ -76,8 +71,7 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs,
             if (option == nullptr) {
                 fprintf(gnuplot, "\'%s\' u 1:%d", filename, i + 2);
             } else {
-                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2,
-                        option);
+                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2, option);
             }
             if (i < outputs.size() - 1) {
                 fprintf(gnuplot, ", ");
@@ -89,14 +83,12 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs,
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title,
-                               const char *option) {
+void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const char *option) {
     OutputCyclize(output, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title,
-                               const char *option, const char *filename) {
+void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const char *option, const char *filename) {
     int count = 3;
 
     std::ofstream ofs(filename);
@@ -118,15 +110,12 @@ void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title,
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs,
-                                 std::string title, const char *option) {
+void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option) {
     OutputCyclize2D(outputs, title, option, "./tmp/output.txt");
 }
 
 template <typename T>
-void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs,
-                                 std::string title, const char *option,
-                                 const char *filename) {
+void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option, const char *filename) {
     int count = 3;
 
     int maxCol = 0;
@@ -166,8 +155,7 @@ void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs,
             if (option == nullptr) {
                 fprintf(gnuplot, "\'%s\' u 1:%d", filename, i + 2);
             } else {
-                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2,
-                        option);
+                fprintf(gnuplot, "\'%s\' using 1:%d %s", filename, i + 2, option);
             }
             if (i < outputs.size() - 1) {
                 fprintf(gnuplot, ", ");

@@ -8,15 +8,9 @@
 
 #include "RBF.h"
 
-double RadiaBasisFunction::output(const double &spread,
-                                  const std::vector<double> &centerVector,
-                                  const std::vector<double> &x) {
-    return exp(-spread * squeredNorm(centerVector, x));
-}
+double RadiaBasisFunction::output(const double &spread, const std::vector<double> &centerVector, const std::vector<double> &x) { return exp(-spread * squeredNorm(centerVector, x)); }
 
-double RadiaBasisFunction::meanSquaredError(
-    const std::vector<std::vector<double>> &d,
-    const std::vector<std::vector<double>> &o) {
+double RadiaBasisFunction::meanSquaredError(const std::vector<std::vector<double>> &d, const std::vector<std::vector<double>> &o) {
     double mse = 0.0;
     auto ms_dIIter = d.begin();
     auto ms_dIIterEnd = d.end();
@@ -38,8 +32,7 @@ double RadiaBasisFunction::meanSquaredError(
     return mse;
 }
 
-double RadiaBasisFunction::squeredNorm(const std::vector<double> &a,
-                                       const std::vector<double> &b) {
+double RadiaBasisFunction::squeredNorm(const std::vector<double> &a, const std::vector<double> &b) {
     double d = 0.0;
     auto no_xIter = a.begin();
     auto no_xIterEnd = a.end();
@@ -53,9 +46,7 @@ double RadiaBasisFunction::squeredNorm(const std::vector<double> &a,
     return d;
 }
 
-void RadiaBasisFunction::mult(std::vector<std::vector<double>> &Y,
-                              const std::vector<std::vector<double>> &A,
-                              const std::vector<std::vector<double>> &B) {
+void RadiaBasisFunction::mult(std::vector<std::vector<double>> &Y, const std::vector<std::vector<double>> &A, const std::vector<std::vector<double>> &B) {
     for (auto &vec : Y) {
         for (auto &value : vec) {
             value = 0.0;

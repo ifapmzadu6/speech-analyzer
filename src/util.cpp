@@ -16,9 +16,7 @@ std::vector<double> Util::GetInput(std::string path, int padding) {
     for (int i = padding; i < tmp.size() - padding * 2; i++) {
         input.push_back(tmp[i]);
     }
-    std::cout << std::endl
-              << "input.size() ->" << input.size() << std::endl
-              << std::endl;
+    std::cout << std::endl << "input.size() ->" << input.size() << std::endl << std::endl;
     return input;
 }
 
@@ -36,8 +34,7 @@ std::vector<double> Util::NormalizeVector(std::vector<double> input) {
     return input;
 }
 
-std::vector<std::vector<double>> Util::NormalizeVectors(
-    std::vector<std::vector<double>> input) {
+std::vector<std::vector<double>> Util::NormalizeVectors(std::vector<std::vector<double>> input) {
     for (int i = 0; i < input.size(); i++) {
         double max = 0;
         for (int j = 0; j < input[i].size(); j++) {
@@ -53,8 +50,7 @@ std::vector<std::vector<double>> Util::NormalizeVectors(
     return input;
 }
 
-std::vector<std::vector<double>> Util::NormalizeSummation(
-    std::vector<std::vector<double>> input) {
+std::vector<std::vector<double>> Util::NormalizeSummation(std::vector<std::vector<double>> input) {
     std::vector<double> sum;
     for (int i = 0; i < input.size(); i++) {
         double d = 0;
@@ -77,8 +73,7 @@ std::vector<std::vector<double>> Util::NormalizeSummation(
     return input;
 }
 
-std::vector<double> Util::CopyVector(std::vector<double> &input, int begin,
-                                     int length) {
+std::vector<double> Util::CopyVector(std::vector<double> &input, int begin, int length) {
     std::vector<double> vector;
     for (int j = 0; j < length; j++) {
         vector.push_back(input[begin + j]);
@@ -86,8 +81,7 @@ std::vector<double> Util::CopyVector(std::vector<double> &input, int begin,
     return vector;
 }
 
-std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input,
-                                                   std::vector<double> vec) {
+std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, std::vector<double> vec) {
     if (input.size() != vec.size()) {
         abort();
     }
@@ -111,6 +105,22 @@ std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input,
         output.push_back(input[(maxIndex + i) % (length - 4)]);
     }
     return output;
+}
+
+std::vector<double> Util::GetCrossCorrelation(std::vector<double> input, std::vector<double> vec) {
+    if (input.size() < vec.size()) {
+        std::cout << "fjaskdfjklasdjkl" << std::endl;
+        abort();
+    }
+    std::vector<double> crossCorrelation;
+    for (int i = 0; i < input.size() - vec.size(); i++) {
+        double d = 0;
+        for (int j = 0; j < vec.size(); j++) {
+            d += input[i + j] * vec[j];
+        }
+        crossCorrelation.push_back(d);
+    }
+    return crossCorrelation;
 }
 
 std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input) {
@@ -143,8 +153,7 @@ std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input) {
             std::cout << "zeroend = " << zero << std::endl;
         }
         */
-        if (input[size - 1 - i] == 0 ||
-            input[size - 1 - i] * input[size - 1 - i - 1] < 0) {
+        if (input[size - 1 - i] == 0 || input[size - 1 - i] * input[size - 1 - i - 1] < 0) {
             end = size - i;
             break;
         }
@@ -155,9 +164,7 @@ std::vector<double> Util::ZerofyFirstAndLast(std::vector<double> input) {
 }
 
 // Julius
-std::vector<std::vector<double>> Util::GetSplittedDataByJulius(
-    std::vector<double> &input, int samplingSize,
-    std::vector<JuliusResult> &juliusResults) {
+std::vector<std::vector<double>> Util::GetSplittedDataByJulius(std::vector<double> &input, int samplingSize, std::vector<JuliusResult> &juliusResults) {
     std::vector<std::vector<double>> splitted;
     for (int i = 0; i < juliusResults.size(); i++) {
         int from = juliusResults[i].from * samplingSize;

@@ -1,8 +1,7 @@
 
 #include "kernel_density_estimation.h"
 
-int KernelDensityEstimation::IndexOfMaxDensity(
-    std::vector<std::vector<double>> &inputs) {
+int KernelDensityEstimation::IndexOfMaxDensity(std::vector<std::vector<double>> &inputs) {
     if (inputs.size() == 0) {
         return -1;
     }
@@ -27,6 +26,4 @@ int KernelDensityEstimation::IndexOfMaxDensity(
     return max;
 }
 
-double KernelDensityEstimation::gaussian(double x) {
-    return exp(-pow(x, 2) / 2) / sqrt(2 * M_PI);
-}
+double KernelDensityEstimation::gaussian(double x) { return exp(-pow(x, 2) / 2) / sqrt(2 * M_PI); }
