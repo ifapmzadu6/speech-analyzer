@@ -4,11 +4,19 @@
 
 template <typename T>
 void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *option) {
-    Output(output, title, option, "./tmp/output.txt");
+    Output(output, title, option, nullptr);
 }
 
 template <typename T>
 void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *option, const char *filename) {
+    if (filename == nullptr) {
+        filename = "./tmp/output.txt";
+    }
+    Output(output, title, option, filename, false, NULL);
+}
+
+template <typename T>
+void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *option, const char *filename, bool isPDF, const char *pdfname) {
     std::ofstream ofs(filename);
     for (int i = 0; i < output.size(); i++) {
         ofs << i << " " << output[i] << std::endl;
@@ -16,8 +24,13 @@ void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *o
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
-    // fprintf(gnuplot, "set title \"%s\";", title);
-    fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    if (isPDF) {
+        fprintf(gnuplot, "set term pdf; set output \"%s\";", pdfname);
+    }
+    else {
+        // fprintf(gnuplot, "set title \"%s\";", title);
+        fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    }
     fprintf(gnuplot, "unset key;");
     if (option == nullptr) {
         fprintf(gnuplot, "p \'%s\'", filename);
@@ -29,11 +42,19 @@ void Gnuplot<T>::Output(std::vector<T> &output, std::string title, const char *o
 
 template <typename T>
 void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option) {
-    Output2D(outputs, title, option, "./tmp/output.txt");
+    Output2D(outputs, title, option, nullptr);
 }
 
 template <typename T>
 void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option, const char *filename) {
+    if (filename == nullptr) {
+        filename = "./tmp/output.txt";
+    }
+    Output2D(outputs, title, option, filename, false, NULL);
+}
+
+template <typename T>
+void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option, const char *filename, bool isPDF, const char *pdfname) {
     std::ofstream ofs(filename);
 
     int maxCol = 0;
@@ -55,8 +76,13 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string titl
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
-    // fprintf(gnuplot, "set title \"%s\";", title);
-    fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    if (isPDF) {
+        fprintf(gnuplot, "set term pdf; set output \"%s\";", pdfname);
+    }
+    else {
+        // fprintf(gnuplot, "set title \"%s\";", title);
+        fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    }
     fprintf(gnuplot, "unset key;");
     fprintf(gnuplot, "p ");
 
@@ -84,11 +110,19 @@ void Gnuplot<T>::Output2D(std::vector<std::vector<T>> &outputs, std::string titl
 
 template <typename T>
 void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const char *option) {
-    OutputCyclize(output, title, option, "./tmp/output.txt");
+    OutputCyclize(output, title, option, nullptr);
 }
 
 template <typename T>
 void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const char *option, const char *filename) {
+    if (filename == nullptr) {
+        filename = "./tmp/output.txt";
+    }
+    OutputCyclize(output, title, option, filename, false, NULL);
+}
+
+template <typename T>
+void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const char *option, const char *filename, bool isPDF, const char *pdfname) {
     int count = 3;
 
     std::ofstream ofs(filename);
@@ -98,8 +132,13 @@ void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const 
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
-    // fprintf(gnuplot, "set title \"%s\";", title);
-    fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    if (isPDF) {
+        fprintf(gnuplot, "set term pdf; set output \"%s\";", pdfname);
+    }
+    else {
+        // fprintf(gnuplot, "set title \"%s\";", title);
+        fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    }
     fprintf(gnuplot, "unset key;");
     if (option == nullptr) {
         fprintf(gnuplot, "p \'%s\'", filename);
@@ -111,11 +150,19 @@ void Gnuplot<T>::OutputCyclize(std::vector<T> &output, std::string title, const 
 
 template <typename T>
 void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option) {
-    OutputCyclize2D(outputs, title, option, "./tmp/output.txt");
+    OutputCyclize2D(outputs, title, option, nullptr);
 }
 
 template <typename T>
 void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option, const char *filename) {
+    if (filename == nullptr) {
+        filename = "./tmp/output.txt";
+    }
+    OutputCyclize2D(outputs, title, option, filename, false, NULL);
+}
+
+template <typename T>
+void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs, std::string title, const char *option, const char *filename, bool isPDF, const char *pdfname) {
     int count = 3;
 
     int maxCol = 0;
@@ -139,8 +186,13 @@ void Gnuplot<T>::OutputCyclize2D(std::vector<std::vector<T>> &outputs, std::stri
     ofs.close();
 
     FILE *gnuplot = popen("gnuplot", "w");
-    // fprintf(gnuplot, "set title \"%s\";", title);
-    fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    if (isPDF) {
+        fprintf(gnuplot, "set term pdf; set output \"%s\";", pdfname);
+    }
+    else {
+        // fprintf(gnuplot, "set title \"%s\";", title);
+        fprintf(gnuplot, "set term aqua title \"%s\";", title.c_str());
+    }
     fprintf(gnuplot, "unset key;");
     fprintf(gnuplot, "p ");
 

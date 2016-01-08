@@ -17,6 +17,7 @@
 #include "kernel_density_estimation.h"
 #include "util.h"
 #include "findpeaks.h"
+#include "fir_filter.h"
 
 struct UnitWave {
     std::string unit;
@@ -34,9 +35,6 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
 
 // Julius
 UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vector<std::vector<double>> &splittedDataByJulius, std::vector<JuliusResult> &juliusResults, int indexOfJulius);
-
-// Clustering
-void showClustering(std::vector<double> &input, int samplingSize);
 
 int main() {
     int samplingSize = 16000;
@@ -87,12 +85,15 @@ int main() {
             std::cout << "Size of wave is too small!" << std::endl;
             continue;
         }
-        if (true) {
+        if (false) {
             Gnuplot<double>::Output(bestCycle, "[bestCycle]" + before + "-" + unit + "-" + after, "w l");
         }
         std::cout << "indexOfTryphones -> " << indexOfTryphones << std::endl;
 
         std::vector<double> crossCorrelation = Util::GetCrossCorrelation(wave, bestCycle);
+        if (false) {
+            Gnuplot<double>::Output(crossCorrelation, "[crossCorrelation]" + before + "-" + unit + "-" + after, "w l");
+        }
 
         std::vector<int> peaks = FindPeaks<double>::finds(crossCorrelation);
         int firstPeak = 0;
@@ -107,13 +108,35 @@ int main() {
         }
         // firstPeak = std::max(firstPeak-100, 0);
 
-        int targetSize = 140;
-        int errorSize = 40;
+        // TODO: Remove
+        if (false) {
+            int index = 0;
+            std::vector<double> vec;
+            for (int j = 0; j < crossCorrelation.size(); j++) {
+                if (index < peaks.size() && peaks[index] == j) {
+                    vec.push_back(crossCorrelation[j]);
+                    index++;
+                } else {
+                    vec.push_back(0);
+                }
+            }
+            std::vector<std::vector<double>> tmp;
+            tmp.push_back(crossCorrelation);
+            tmp.push_back(vec);
+            Gnuplot<double>::Output2D(tmp, "[crossCorrelation+peak]" + before + "-" + unit + "-" + after, "w l");
+        }
+
+        int targetSize = 130;
+        int errorSize = 50;
         std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(wave, samplingSize, firstPeak, targetSize - errorSize, targetSize + errorSize);
         std::cout << "cycles.size -> " << cycles.size() << std::endl;
         if (cycles.size() == 0) {
             continue;
         }
+
+        std::vector<std::vector<double>> gnuplotForWaves;
+        std::vector<double> raw = Util::CopyVector(inputForJulius, from, length);
+        gnuplotForWaves.push_back(raw);
 
         // 書き換え
         std::cout << "from -> " << from << std::endl;
@@ -161,23 +184,29 @@ int main() {
                 for (int k = 0; k < insertCycle.size(); k++) {
                     insertCycle[k] /= rate;
                 }
+
+                double s = 0;
+                for (int k = 0; k < insertCycle.size(); k++) {
+                    s += insertCycle[k] * inputCycle[k];
+                }
+
+                // if (s < 0) {
+                //    std::cout << "reverse!" << std::endl;
+                insertCycle = Util::MiximizeCrossCorrelation(insertCycle, inputCycle);
+                insertCycle = Util::ZerofyFirstAndLast(insertCycle);
+                //}
+
                 double max = -1;
-                double min = 1;
                 for (int k = 0; k < insertCycle.size(); k++) {
                     double value = insertCycle[k];
                     if (max < value) {
                         max = value;
-                    }
-                    if (min > value) {
-                        min = value;
                     }
                 }
                 double diff = inputMax - max;
                 for (int k = 0; k < insertCycle.size(); k++) {
                     insertCycle[k] += diff;
                 }
-
-                insertCycle = Util::MiximizeCrossCorrelation(insertCycle, inputCycle);
             }
 
             std::cout << "length -> " << cycles[j].length << std::endl;
@@ -191,21 +220,35 @@ int main() {
                 inputForJulius.insert(inputForJulius.begin() + from + cycles[j].index, insertCycle[k]);
             }
 
-            if (true) {
+            if (false) {
                 Gnuplot<double>::Output(inputCycle, before + "-" + unit + "-" + after, "w l");
             }
         }
 
-        if (false) {
+        if (true) {
             std::vector<double> modified = Util::CopyVector(inputForJulius, from, length);
-            Gnuplot<double>::Output(modified, before + "-" + unit + "-" + after, "w l");
+            // Gnuplot<double>::Output(modified, before + "-" + unit + "-" + after, "w l");
+
+            gnuplotForWaves.push_back(modified);
+            std::string filename = "./pdf/image" + Util::toString(i) + ".pdf";
+            Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", "./tmp/output.txt", true, filename.c_str());
         }
     }
 
     // 音声ファイルとして保存
     if (true) {
+        std::vector<double> filtered;
+        int filterCount = 5;
+        std::vector<double> init = Util::CopyVector(inputForJulius, 0, filterCount);
+        FIRFilter filter(filterCount, init);
+        for (int i = 0; i < inputForJulius.size() - filterCount; i++) {
+            filtered.push_back(filter.getValue());
+            filter.next(inputForJulius[i + filterCount]);
+        }
+
         Wave wav;
-        wav.CreateWave(inputForJulius, samplingSize, 16);
+        // wav.CreateWave(inputForJulius, samplingSize, 16);
+        wav.CreateWave(filtered, samplingSize, 16);
         wav.OutputWave("./output/output.wav");
     }
 
@@ -253,10 +296,20 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
 }
 
 std::vector<std::vector<double>> getBestTryphoneWaves(std::vector<std::vector<std::vector<double>>> &tryphoneWaves) {
-    std::vector<std::vector<double>> bestTryphoneWaves;
+    std::vector<std::vector<std::vector<double>>> convertedTryphoneWaves;
     for (int i = 0; i < tryphoneWaves.size(); i++) {
-        std::vector<std::vector<double>> tryphoneWave = tryphoneWaves[i];
+        std::vector<std::vector<double>> vecs;
+        for (int j = 0; j < tryphoneWaves[i].size(); j++) {
+            vecs.push_back(LinearInterpolation::convert(tryphoneWaves[i][j], 600));
+        }
+        convertedTryphoneWaves.push_back(vecs);
+    }
+
+    std::vector<std::vector<double>> bestTryphoneWaves;
+    for (int i = 0; i < convertedTryphoneWaves.size(); i++) {
+        std::vector<std::vector<double>> tryphoneWave = convertedTryphoneWaves[i];
         int indexOfMaxDeisity = KernelDensityEstimation::IndexOfMaxDensity(tryphoneWave);
+
         bestTryphoneWaves.push_back(tryphoneWave[indexOfMaxDeisity]);
     }
     return bestTryphoneWaves;
@@ -364,15 +417,13 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
     }
     firstPeak = std::max(firstPeak - 50, 0);
 
-    int targetSize = 140;
-    int errorSize = 40;
+    int targetSize = 130;
+    int errorSize = 30;
     std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(julius, samplingSize, firstPeak, targetSize - errorSize, targetSize + errorSize);
-    if (cycles.size() < 3) {
+    if (cycles.size() <= 2) {
         return nullptr;
     }
-    // std::cout << "cycles.size() -> " << cycles.size() << std::endl;
 
-    // 先頭の波を利用する
     int maxLength = -1;
     for (int j = 0; j < cycles.size(); j++) {
         if (maxLength < cycles[j].length) {
@@ -381,6 +432,7 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
     }
     // 周期切り出し
     std::vector<std::vector<double>> inputCycles;
+    std::vector<int> indexOfCycles;
     for (int i = 0; i < cycles.size(); i++) {
         std::vector<double> inputCycle = Util::CopyVector(julius, cycles[i].index, cycles[i].length);
         // 波形の長さを揃える
@@ -393,9 +445,10 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
         }
         if (s > 20) {
             inputCycles.push_back(inputCycle);
+            indexOfCycles.push_back(i);
         }
     }
-    if (inputCycles.size() == 0) {
+    if (inputCycles.size() <= 2) {
         return nullptr;
     }
     if (false) {
@@ -404,7 +457,8 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
 
     // 一番重心となっているものを見つける
     int bestClusterIndex = KernelDensityEstimation::IndexOfMaxDensity(inputCycles);
-    std::vector<double> defaultWave = inputCycles[bestClusterIndex];
+    int indexOfCycle = indexOfCycles[bestClusterIndex];
+    std::vector<double> defaultWave = Util::CopyVector(julius, cycles[indexOfCycle].index, cycles[indexOfCycle].length);
 
     // 基準波形の表示
     if (false) {
@@ -416,16 +470,6 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
         Wave wav;
         wav.CreateWave(defaultWave, samplingSize, 16);
         wav.OutputWave("./output/output_default_wave.wav");
-    }
-
-    // 波形の表示
-    if (false) {
-        std::vector<double> gnuplot2;
-        int margin = 100;
-        for (int j = 0; j < julius.size() + margin * 2; j++) {
-            gnuplot2.push_back(input[from + j - margin]);
-        }
-        Gnuplot<double>::Output(gnuplot2, gnuplotSubtitle + "gnuplot2", "w l");
     }
 
     // 基準波形
@@ -469,90 +513,3 @@ cycles[i].length);
         }
     }
 */
-
-// Clustering
-void showClustering(std::vector<double> &input, int samplingSize) {
-    // 周期を解析
-    int targetSize = 140;
-    int errorSize = 70;
-    std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(input, samplingSize, 0, targetSize - errorSize, targetSize + errorSize);
-    std::cout << "cycles.size() -> " << cycles.size() << std::endl;
-    if (cycles.size() < 3) {
-        return;
-    }
-    int maxLength = -1;
-    for (int j = 0; j < cycles.size(); j++) {
-        if (maxLength < cycles[j].length) {
-            maxLength = cycles[j].length;
-        }
-    }
-
-    // 周期切り出し
-    std::vector<std::vector<double>> inputCycles;
-    for (int i = 0; i < cycles.size(); i++) {
-        std::vector<double> inputCycle = Util::CopyVector(input, cycles[i].index, cycles[i].length);
-        // 波形の長さを揃える
-        inputCycle = LinearInterpolation::convert(inputCycle, maxLength);
-        inputCycles.push_back(inputCycle);
-    }
-    // inputCycles = Util::NormalizeSummation(inputCycles);
-    Gnuplot<double>::Output2D(inputCycles, "inputCycles", "w l lc rgb '#E0FF0000'");
-
-    // クラスタリング
-    int countOfCluster = 5;
-    // int dim = targetSize + padding;
-    int dim = inputCycles[0].size();
-    KMeansMethodResult result = KMeansMethod::Clustering(inputCycles, dim, countOfCluster);
-    Gnuplot<double>::Output2D(result.clusters, "result.clusters", "w l");
-
-    // どのクラスターが正解に近いかを表示
-    if (false) {
-        std::vector<std::vector<double>> clusters = result.clusters;
-        std::vector<double> bestCluster;
-        double best = std::numeric_limits<double>::max();
-        for (int i = 0; i < clusters.size(); i++) {
-            double d = 0;
-            for (int j = 0; j < clusters.size(); j++) {
-                for (int k = 0; k < clusters[j].size(); k++) {
-                    d += pow(clusters[j][k] - clusters[i][k], 2);
-                }
-            }
-            if (d < best) {
-                best = d;
-                bestCluster = clusters[i];
-            }
-        }
-        Gnuplot<double>::Output(bestCluster, "bestCluster", "w l");
-    }
-
-    // エラー率を算出
-    if (false) {
-        std::vector<double> errors;
-        for (int i = 0; i < inputCycles.size(); i++) {
-            // 一番近いクラスター
-            int index = result.indexOfCluster[i];
-            std::vector<double> minCluster = result.clusters[index];
-            // 二乗誤差を算出
-            double error = 0;
-            for (int j = 0; j < dim; j++) {
-                error += fabs(inputCycles[i][j] - minCluster[j]) / 2.0;
-            }
-            errors.push_back(error);
-        }
-        Gnuplot<double>::Output(errors, "errors", "w l");
-        Gnuplot<int>::Output(result.indexOfCluster, "result.indexOfCluster", "w p pt 3");
-    }
-
-    // 積分(=エネルギーを見る)
-    if (false) {
-        std::vector<double> energy;
-        for (int i = 0; i < inputCycles.size(); i++) {
-            double e = 0;
-            for (int j = 0; j < inputCycles[i].size(); j++) {
-                e += fabs(inputCycles[i][j]);
-            }
-            energy.push_back(e);
-        }
-        Gnuplot<double>::Output(energy, "energy", "w l");
-    }
-}

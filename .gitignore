@@ -39,6 +39,9 @@ reserve
 # Temp
 tmp
 
+# PDF
+pdf
+
 # Mac
 .DS_Store
 

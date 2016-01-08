@@ -94,6 +94,7 @@ std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, st
         for (int j = 0; j < length; j++) {
             d += input[(i + j) % length] * vec[j];
         }
+
         if (maxD < d) {
             maxD = d;
             maxIndex = i;
@@ -102,7 +103,7 @@ std::vector<double> Util::MiximizeCrossCorrelation(std::vector<double> input, st
 
     std::vector<double> output;
     for (int i = 0; i < length; i++) {
-        output.push_back(input[(maxIndex + i) % (length - 4)]);
+        output.push_back(input[(maxIndex + i) % length]);
     }
     return output;
 }

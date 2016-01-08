@@ -3,18 +3,24 @@
 
 template <typename T>
 std::vector<int> FindPeaks<T>::finds(std::vector<T> &input) {
-    int averageRange = input.size() / 25;
+    double average = 0;
+    for (int i = 0; i < input.size(); i++) {
+        average += input[i];
+    }
+    average /= input.size();
+
+    int localAverageRange = input.size() / 10;
     std::vector<int> inverted;
     for (int i = 1; i < input.size() - 1; i++) {
-        double average = 0;
-        for (int j = i - averageRange; j <= i + averageRange; j++) {
+        double localAverage = 0;
+        for (int j = i - localAverageRange; j <= i + localAverageRange; j++) {
             if (0 <= j && j < input.size()) {
-                average += input[j];
+                localAverage += input[j];
             }
         }
-        average /= averageRange * 2;
+        localAverage /= localAverageRange * 2;
 
-        if (input[i] - input[i - 1] > 0 && input[i + 1] - input[i] < 0 && input[i] > average && input[i] > 0.333) {
+        if (input[i] - input[i - 1] > 0 && input[i + 1] - input[i] < 0 && input[i] > 0 && input[i] > localAverage && input[i] > average) {
             inverted.push_back(i);
         }
     }
