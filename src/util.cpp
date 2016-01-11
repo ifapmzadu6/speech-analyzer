@@ -16,7 +16,7 @@ std::vector<double> Util::GetInput(std::string path, int padding) {
     for (int i = padding; i < tmp.size() - padding * 2; i++) {
         input.push_back(tmp[i]);
     }
-    std::cout << std::endl << "input.size() ->" << input.size() << std::endl << std::endl;
+    // std::cout << std::endl << "input.size() -> " << input.size() << std::endl << std::endl;
     return input;
 }
 
@@ -170,14 +170,12 @@ std::vector<std::vector<double>> Util::GetSplittedDataByJulius(std::vector<doubl
     for (int i = 0; i < juliusResults.size(); i++) {
         int from = juliusResults[i].from * samplingSize;
         int to = juliusResults[i].to * samplingSize;
-        // std::cout << from << " " << to << " " << to - from << " " <<
-        // result.unit
-        // << std::endl;
-        std::vector<double> vector;
+        // std::cout << from << " " << to << " " << to - from << " " << result.unit << std::endl;
+        std::vector<double> vec;
         for (int j = from; j < to; j++) {
-            vector.push_back(input[j]);
+            vec.push_back(input[j]);
         }
-        splitted.push_back(vector);
+        splitted.push_back(vec);
     }
     return splitted;
 }

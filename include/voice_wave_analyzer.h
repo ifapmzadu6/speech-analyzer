@@ -23,9 +23,8 @@ class VoiceWaveAnalyzer {
          * GetCycles: 周期を解析する
          *
          * @input: 入力波形
-         * @samplingfrequency: サンプリング周波数（Hz）
          * @minLength: 求める周期の最小（Hz）
          * @maxLength: 求める周期の最大（Hz）
          */
-    static std::vector<Cycle> GetCycles(const std::vector<double> &input, int samplingFrequency, int initIndex, int minLength, int maxLength);
+    static std::vector<Cycle> GetCycles(const std::vector<double> &input, int initIndex, int minLength, int maxLength);
 };

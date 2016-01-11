@@ -3,7 +3,7 @@
 
 #include "gnuplot.h"
 
-std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(const std::vector<double> &input, int samplingFrequency, int initIndex, int minLength, int maxLength) {
+std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(const std::vector<double> &input, int initIndex, int minLength, int maxLength) {
     int inputSize = input.size();               // 入力のサンプル数
     int dsize = (minLength + maxLength) / 2;    // 相関関数の幅
     int fixSize = (maxLength - minLength) / 2;  // 零点修正誤差範囲
@@ -22,6 +22,7 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(const std::vector<double> &input
     }
     // ボーダーの値を決定する
     double border = maxValue / 10;
+    border = 0;
 
     // 入力を探索し、それぞれの相関関数を求め、
     // 最大となる（波形が似ている）箇所を探し、保存していく
