@@ -66,7 +66,7 @@ std::vector<Cycle> VoiceWaveAnalyzer::GetCycles(const std::vector<double> &input
     }
 
     if (fixedIndexes.size() == 0 || indexes.size() == 0) {
-        //std::cout << "no results" << std::endl;
+        // std::cout << "no results" << std::endl;
         return std::vector<Cycle>();
     }
 

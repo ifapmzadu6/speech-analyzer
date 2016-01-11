@@ -13,7 +13,7 @@
 #include "gnuplot.h"
 #include "julius_importer.h"
 #include "audio.h"
-#include "linear_interpolation.h"
+#include "lanczos_resampling.h"
 #include "kernel_density_estimation.h"
 #include "util.h"
 #include "findpeaks.h"
@@ -145,7 +145,7 @@ int main() {
         for (int j = cycles.size() - 1; j >= 0; j--) {
             std::vector<double> inputCycle = Util::CopyVector(wave, cycles[j].index, cycles[j].length);
             // 波形の長さを揃える
-            std::vector<double> insertCycle = LinearInterpolation::convert(bestCycle, cycles[j].length);
+            std::vector<double> insertCycle = LanczosResampling::convert(bestCycle, cycles[j].length);
             // 一定の条件以下では除外する
             // 面積
             double s = 0;
@@ -225,30 +225,21 @@ int main() {
             }
         }
 
-        if (true) {
+        if (false) {
             std::vector<double> modified = Util::CopyVector(inputForJulius, from, length);
             // Gnuplot<double>::Output(modified, before + "-" + unit + "-" + after, "w l");
 
             gnuplotForWaves.push_back(modified);
             std::string filename = "./pdf/image" + Util::toString(i) + ".pdf";
-            Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", "./tmp/output.txt", true, filename.c_str());
+            Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
         }
     }
 
     // 音声ファイルとして保存
     if (true) {
-        std::vector<double> filtered;
-        int filterCount = 5;
-        std::vector<double> init = Util::CopyVector(inputForJulius, 0, filterCount);
-        FIRFilter filter(filterCount, init);
-        for (int i = 0; i < inputForJulius.size() - filterCount; i++) {
-            filtered.push_back(filter.getValue());
-            filter.next(inputForJulius[i + filterCount]);
-        }
-
         Wave wav;
-        // wav.CreateWave(inputForJulius, samplingSize, 16);
-        wav.CreateWave(filtered, samplingSize, 16);
+        wav.CreateWave(inputForJulius, samplingSize, 16);
+        //wav.CreateWave(filtered, samplingSize, 16);
         wav.OutputWave("./output/output.wav");
     }
 
@@ -265,7 +256,7 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
         std::string title = units[0].before + "-" + units[0].unit + "-" + units[0].after;
 
         // 表示
-        if (false) {
+        if (true) {
             int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(waves);
             std::vector<std::vector<double>> vecs;
             for (int j = 0; j < waves.size(); j++) {
@@ -275,6 +266,9 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
                 vecs.push_back(waves[bestIndex]);  // 線を濃くする
             }
             Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'");
+
+            // std::string pdfname = "./pdf/" + title + ".pdf";
+            // Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'", nullptr, true, pdfname.c_str());
         }
 
         // クラスタリング
@@ -300,7 +294,7 @@ std::vector<std::vector<double>> getBestTryphoneWaves(std::vector<std::vector<st
     for (int i = 0; i < tryphoneWaves.size(); i++) {
         std::vector<std::vector<double>> vecs;
         for (int j = 0; j < tryphoneWaves[i].size(); j++) {
-            vecs.push_back(LinearInterpolation::convert(tryphoneWaves[i][j], 600));
+            vecs.push_back(LanczosResampling::convert(tryphoneWaves[i][j], 600));
         }
         convertedTryphoneWaves.push_back(vecs);
     }
@@ -322,7 +316,7 @@ std::vector<std::vector<std::vector<double>>> getTryphoneWaves(std::vector<std::
 
         std::vector<std::vector<double>> tmpwaves;
         for (int j = 0; j < units.size(); j++) {
-            auto wave = LinearInterpolation::convert(units[j].wave, 200);
+            auto wave = LanczosResampling::convert(units[j].wave, 200);
             tmpwaves.push_back(wave);
         }
 
@@ -345,20 +339,43 @@ std::vector<std::vector<std::vector<double>>> getTryphoneWaves(std::vector<std::
 std::vector<UnitWave> getUnitWaves(int samplingSize) {
     std::vector<UnitWave> unitWaves;
     for (int h = 0; h <= 199; h++) {
-        // 音声データからUnitWaveの取り出し
         auto inputForJulius = Util::GetInput("./resource/" + Util::toString(h) + ".wav", 0);
         JuliusImporter juliusImporter("./resource/" + Util::toString(h) + ".lab");
         auto juliusResults = juliusImporter.getJuliusResults();
         auto splittedDataByJulius = Util::GetSplittedDataByJulius(inputForJulius, samplingSize, juliusResults);
-        for (int i = 0; i < juliusResults.size(); i++) {
+        for (int i = 1; i + 1 < juliusResults.size(); i++) {
             auto result = juliusResults[i];
-            if ((result.unit == "a") || (result.unit == "i") || (result.unit == "u") || (result.unit == "e") || (result.unit == "o")) {
-                UnitWave *unitWave = enumurateJulius(inputForJulius, samplingSize, splittedDataByJulius, juliusResults, i);
-                if (unitWave != nullptr) {
-                    unitWaves.push_back(*unitWave);
-                }
+            UnitWave *unitWave = enumurateJulius(inputForJulius, samplingSize, splittedDataByJulius, juliusResults, i);
+            if (unitWave != nullptr) {
+                unitWaves.push_back(*unitWave);
             }
         }
+    }
+    if (true) {
+        int a = 0;
+        int i = 0;
+        int u = 0;
+        int e = 0;
+        int o = 0;
+        for (int j = 0; j < unitWaves.size(); j++) {
+            if (unitWaves[j].unit == "a") {
+                a++;
+            } else if (unitWaves[j].unit == "i") {
+                i++;
+            } else if (unitWaves[j].unit == "u") {
+                u++;
+            } else if (unitWaves[j].unit == "e") {
+                e++;
+            } else if (unitWaves[j].unit == "o") {
+                o++;
+            }
+        }
+        std::cout << "Total: " << unitWaves.size() << std::endl;
+        std::cout << "a: " << a << std::endl;
+        std::cout << "i: " << i << std::endl;
+        std::cout << "u: " << u << std::endl;
+        std::cout << "e: " << e << std::endl;
+        std::cout << "o: " << o << std::endl;
     }
     return unitWaves;
 }
@@ -386,11 +403,12 @@ std::vector<std::vector<UnitWave>> getTryphones(std::vector<UnitWave> &unitWaves
         }
     }
     if (true) {
-        std::cout << "Total: " << unitWaves.size() << std::endl;
+        /*
         for (int i = 0; i < tryphones.size(); i++) {
             std::vector<UnitWave> units = tryphones[i];
             std::cout << units[0].before << "-" << units[0].unit << "-" << units[0].after << ": " << units.size() << std::endl;
         }
+        */
     }
     return tryphones;
 }
@@ -404,22 +422,9 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
 
     std::vector<double> julius = splittedDataByJulius[indexOfJulius];
 
-    std::vector<int> peaks = FindPeaks<double>::finds(julius);
-    int firstPeak = 0;
-    double minValue = 100;
-    for (int i = 0; i < peaks.size(); i++) {
-        int range = julius.size() / 5;
-        double value = pow(1 - julius[peaks[i]], 2) + pow(peaks[i] / range, 2);
-        if (peaks[i] < range && minValue > value) {
-            minValue = value;
-            firstPeak = peaks[i];
-        }
-    }
-    firstPeak = std::max(firstPeak - 50, 0);
-
     int targetSize = 130;
     int errorSize = 30;
-    std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(julius, samplingSize, firstPeak, targetSize - errorSize, targetSize + errorSize);
+    std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(julius, samplingSize, 0, targetSize - errorSize, targetSize + errorSize);
     if (cycles.size() <= 2) {
         return nullptr;
     }
@@ -436,14 +441,13 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
     for (int i = 0; i < cycles.size(); i++) {
         std::vector<double> inputCycle = Util::CopyVector(julius, cycles[i].index, cycles[i].length);
         // 波形の長さを揃える
-        inputCycle = LinearInterpolation::convert(inputCycle, maxLength);
-        // 一定の条件以下では除外する
-        // 面積
+        inputCycle = LanczosResampling::convert(inputCycle, maxLength);
+        // 面積、一定の条件以下では除外する
         double s = 0;
         for (int i = 0; i < inputCycle.size(); i++) {
             s += fabs(inputCycle[i]);
         }
-        if (s > 20) {
+        if (s > 15) {
             inputCycles.push_back(inputCycle);
             indexOfCycles.push_back(i);
         }
@@ -480,36 +484,3 @@ UnitWave *enumurateJulius(std::vector<double> &input, int samplingSize, std::vec
     unitWave->wave = defaultWave;
     return unitWave;
 }
-
-/*
-// 入力の書き換え
-    if (false) {
-        for (int i = 0; i < cycles.size(); i++) {
-            double max = -1, min = 1;
-            for (int k = 0; k < cycles[i].length; k++) {
-                double value = julius[cycles[i].index + k];
-                if (value > max) {
-                    max = value;
-                }
-                if (value < min) {
-                    min = value;
-                }
-            }
-            double amp = fabs(max - min);
-
-            // 入力の書き換え
-            for (int j = 0; j < cycles[i].length; j++) {
-                input.erase(input.begin() + from + cycles[i].index);
-            }
-
-            auto wave = LinearInterpolation::convert(defaultWave,
-cycles[i].length);
-            double rate = amp / defaultAmp;
-            double diff = max - defaultMax;
-            for (int k = 0; k < cycles[i].length; k++) {
-                int index = from + cycles[i].index + k;
-                input.insert(input.begin() + index, wave[k] * rate - diff);
-            }
-        }
-    }
-*/

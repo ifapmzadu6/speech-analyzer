@@ -6,24 +6,29 @@ int KernelDensityEstimation::IndexOfMaxDensity(std::vector<std::vector<double>> 
         return -1;
     }
 
-    int dim = inputs[0].size();
+    int maxValue = -1;
+    double maxIndex = 0;
+    for (int i = 0; i < inputs.size(); i++) {
+        std::vector<double> input = inputs[i];
 
-    int max = -1;
-    double maxY = 0;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < inputs.size(); j++) {
-            double y = 0;
+        double value = 0;
+        for (int j = 0; j < input.size(); j++) {
             for (int k = 0; k < inputs.size(); k++) {
-                y += gaussian(inputs[k][i] - inputs[j][i]);
-            }
-            if (maxY < y) {
-                maxY = y;
-                max = j;
+                if (k != i) {
+                    value += gaussian(input[j] - inputs[k][j]);
+                }
             }
         }
-    }
 
-    return max;
+        if (maxValue < value) {
+            maxValue = value;
+            maxIndex = i;
+        }
+    }
+    return maxIndex;
 }
 
-double KernelDensityEstimation::gaussian(double x) { return exp(-pow(x, 2) / 2) / sqrt(2 * M_PI); }
+double KernelDensityEstimation::gaussian(double x) {
+    double sigma = 0.2;
+    return exp(-pow(x, 2) / 2 / pow(sigma, 2)) / sqrt(2 * M_PI) / sigma;
+}
