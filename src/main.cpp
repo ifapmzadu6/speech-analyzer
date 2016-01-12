@@ -253,7 +253,7 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
         }
         std::string title = units[0].before + "-" + units[0].unit + "-" + units[0].after;
 
-        if (false) { // Gnuplotで表示
+        if (false) {  // Gnuplotで表示
             int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(waves);
             std::vector<std::vector<double>> vecs;
             for (int j = 0; j < waves.size(); j++) {
@@ -268,14 +268,14 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
             // Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'", nullptr, true, pdfname.c_str());
         }
 
-        if (false) { // クラスタリング
+        if (false) {  // クラスタリング
             int countOfCluster = 10;
             int dim = waves[0].size();
             KMeansMethodResult result = KMeansMethod::Clustering(waves, dim, countOfCluster);
             Gnuplot<double>::Output2D(result.clusters, title, "w l");
         }
 
-        if (false) { // 音声ファイルとして保存
+        if (false) {  // 音声ファイルとして保存
             int bestIndex = KernelDensityEstimation::IndexOfMaxDensity(waves);
             Wave wav;
             wav.CreateWave(waves[bestIndex], samplingSize, 16);
