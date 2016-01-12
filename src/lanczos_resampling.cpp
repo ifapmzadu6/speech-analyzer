@@ -1,7 +1,6 @@
 
 #include "lanczos_resampling.h"
 
-
 std::vector<double> LanczosResampling::convert(std::vector<double> &input, int toCycle) {
     int fromCycle = input.size();
     int filterSize = 64;
@@ -34,5 +33,3 @@ double LanczosResampling::lanczos(double x, int a) {
     }
     return 0.0;
 }
-
-

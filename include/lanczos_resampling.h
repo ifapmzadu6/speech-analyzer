@@ -8,7 +8,6 @@
 
 class LanczosResampling {
    public:
-
     static std::vector<double> convert(std::vector<double> &input, int toCycle);
 
     static double sinc(double x);
@@ -26,4 +25,3 @@ class LanczosResampling {
         Gnuplot<double>::Output(y, "test", "w l");
     }
 };
-
