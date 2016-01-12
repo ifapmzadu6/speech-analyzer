@@ -4,7 +4,7 @@
 
 std::vector<double> LanczosResampling::convert(std::vector<double> &input, int toCycle) {
     int fromCycle = input.size();
-    int filterSize = 16;
+    int filterSize = 64;
     std::vector<double> output;
     for (int i = 0; i < toCycle; i++) {
         double v = double(fromCycle) * i / toCycle;
@@ -25,7 +25,7 @@ double LanczosResampling::sinc(double x) {
         return (1.0);
     }
     double v = M_PI * x;
-    return sin(v) / v;
+    return std::sin(v) / v;
 }
 
 double LanczosResampling::lanczos(double x, int a) {

@@ -26,7 +26,7 @@ struct UnitWave {
     std::vector<double> wave;
 };
 
-std::vector<UnitWave> getUnitWaves(int samplingSize, int extendedSamplingSize);
+std::vector<UnitWave> getUnitWaves(int samplingSize);
 std::vector<std::vector<UnitWave>> getTryphones(std::vector<UnitWave> &unitWaves);
 std::vector<std::vector<std::vector<double>>> getTryphoneWaves(std::vector<std::vector<UnitWave>> &tryphones);
 std::vector<std::vector<double>> getBestTryphoneWaves(std::vector<std::vector<std::vector<double>>> &tryphoneWaves);
@@ -34,14 +34,13 @@ std::vector<std::vector<double>> getBestTryphoneWaves(std::vector<std::vector<st
 void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std::vector<std::vector<std::vector<double>>> tryphoneWaves);
 
 int main() {
-    int samplingSize = 16000;
-    int extendedSamplingSize = 16000 * 8;
-    std::vector<UnitWave> unitWaves = getUnitWaves(samplingSize, extendedSamplingSize);
+    int samplingSize = 44100;
+    std::vector<UnitWave> unitWaves = getUnitWaves(samplingSize);
     std::vector<std::vector<UnitWave>> tryphones = getTryphones(unitWaves);
     std::vector<std::vector<std::vector<double>>> tryphoneWaves = getTryphoneWaves(tryphones);
     std::vector<std::vector<double>> bestTryphoneWaves = getBestTryphoneWaves(tryphoneWaves);
 
-    display(extendedSamplingSize, tryphones, tryphoneWaves);
+    display(samplingSize, tryphones, tryphoneWaves);
 
     // ここから音声書き換え開始
     auto inputForJulius = Util::GetInput("./resource/0.wav", 0);
@@ -125,10 +124,8 @@ int main() {
             Gnuplot<double>::Output2D(tmp, "[crossCorrelation+peak]" + before + "-" + unit + "-" + after, "w l");
         }
 
-        //int targetSize = 130 * double(extendedSamplingSize) / double(samplingSize);
-        //int errorSize = 30 * double(extendedSamplingSize) / double(samplingSize);
-        int targetSize = 130;
-        int errorSize = 30;
+        int targetSize = 360;
+        int errorSize = 100;
         std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(wave, firstPeak, targetSize - errorSize, targetSize + errorSize);
         std::cout << "cycles.size -> " << cycles.size() << std::endl;
         if (cycles.size() == 0) {
@@ -370,25 +367,20 @@ std::vector<std::vector<UnitWave>> getTryphones(std::vector<UnitWave> &unitWaves
     return tryphones;
 }
 
-std::vector<UnitWave> getUnitWaves(int samplingSize, int extendedSamplingSize) {
+std::vector<UnitWave> getUnitWaves(int samplingSize) {
     std::vector<UnitWave> unitWaves;
 
     for (int h = 0; h <= 199; h++) {
         auto inputForJulius = Util::GetInput("./resource/" + Util::toString(h) + ".wav", 0);
         JuliusImporter juliusImporter("./resource/" + Util::toString(h) + ".lab");
         auto juliusResults = juliusImporter.getJuliusResults();
-
         auto splittedData = Util::GetSplittedDataByJulius(inputForJulius, samplingSize, juliusResults);
-        for (int i=0; i<splittedData.size(); i++) {
-            double upsamplingRatio = double(extendedSamplingSize) / double(samplingSize);
-            splittedData[i] = LanczosResampling::convert(splittedData[i], splittedData[i].size() * upsamplingRatio);
-        }
 
         for (int i = 1; i + 1 < juliusResults.size(); i++) {
             std::vector<double> data = splittedData[i];
 
-            int targetSize = 130 * double(extendedSamplingSize) / double(samplingSize);
-            int errorSize = 30 * double(extendedSamplingSize) / double(samplingSize);
+            int targetSize = 360;
+            int errorSize = 100;
             std::vector<Cycle> cycles = VoiceWaveAnalyzer::GetCycles(data, 0, targetSize - errorSize, targetSize + errorSize);
             if (cycles.size() <= 2) {
                 continue;
@@ -403,7 +395,7 @@ std::vector<UnitWave> getUnitWaves(int samplingSize, int extendedSamplingSize) {
                 for (int k = 0; k < inputCycle.size(); k++) {
                     s += fabs(inputCycle[k]);
                 }
-                if (s > 15) {
+                if (s > 40) {
                     inputCycles.push_back(inputCycle);
                 }
             }
