@@ -223,13 +223,14 @@ int main() {
             }
         }
 
-        if (false) {
+        if (true) {
             std::vector<double> modified = Util::CopyVector(inputForJulius, from, length);
-            // Gnuplot<double>::Output(modified, before + "-" + unit + "-" + after, "w l");
+            //Gnuplot<double>::Output(modified, before + "-" + unit + "-" + after, "w l");
 
-            gnuplotForWaves.push_back(modified);
-            std::string filename = "./pdf/image" + Util::toString(i) + ".pdf";
-            Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
+            //gnuplotForWaves.push_back(modified);
+            std::string filename = "./pdf/image-" + before + "-" + unit + "-" + after + ".pdf";
+            //Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
+            Gnuplot<double>::Output(gnuplotForWaves[0], before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
         }
     }
 
@@ -264,8 +265,8 @@ void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std
             }
             Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'");
 
-            // std::string pdfname = "./pdf/" + title + ".pdf";
-            // Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'", nullptr, true, pdfname.c_str());
+            std::string pdfname = "./pdf/" + title + ".pdf";
+            Gnuplot<double>::Output2D(vecs, title, "w l lc rgb '#E0FF0000'", nullptr, true, pdfname.c_str());
         }
 
         if (false) {  // クラスタリング
@@ -367,7 +368,7 @@ std::vector<std::vector<UnitWave>> getTryphones(std::vector<UnitWave> &unitWaves
 std::vector<UnitWave> getUnitWaves(int samplingSize) {
     std::vector<UnitWave> unitWaves;
 
-    for (int h = 0; h <= 199; h++) {
+    for (int h = 0; h <= 399; h++) {
         auto inputForJulius = Util::GetInput("./resource/" + Util::toString(h) + ".wav", 0);
         JuliusImporter juliusImporter("./resource/" + Util::toString(h) + ".lab");
         auto juliusResults = juliusImporter.getJuliusResults();
