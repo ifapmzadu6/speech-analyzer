@@ -266,9 +266,10 @@ int main() {
                 }
                 */
 
-                //int len = target[j] * 15;
-                int len = ave;
-                insertCycle = LanczosResampling::convert(insertCycle, len);
+                int len = ave + target[j] * 50;
+                //int len = ave;
+                //
+                //insertCycle = LanczosResampling::convert(insertCycle, len);
 
                 // 挿入
                 for (int k = insertCycle.size() - 1; k >= 0; k--) {
