@@ -54,17 +54,14 @@ class LorenzSystem {
 
    private:
     double dx(double x, double y, double z) {
-        double dx = (-p * x + p * y) * dt;
-        return dx;
+        return (-p * x + p * y) * dt;
     }
 
     double dy(double x, double y, double z) {
-        double dy = (-x * z + r * x - y) * dt;
-        return dy;
+        return (-x * z + r * x - y) * dt;
     }
 
     double dz(double x, double y, double z) {
-        double dz = (x * y - b * z) * dt;
-        return dz;
+        return (x * y - b * z) * dt;
     }
 };

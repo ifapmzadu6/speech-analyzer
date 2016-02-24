@@ -7,9 +7,10 @@
 #include <sstream>
 #include <random>
 
+
 #include "wave.h"
-#include "voice_wave_analyzer.h"
 #include "kmeans_method.h"
+#include "voice_wave_analyzer.h"
 #include "gnuplot.h"
 #include "julius_importer.h"
 #include "audio.h"
@@ -18,6 +19,8 @@
 #include "util.h"
 #include "findpeaks.h"
 #include "fir_filter.h"
+#include "sano_sawada.hpp"
+
 
 struct UnitWave {
     std::string unit;
@@ -34,6 +37,7 @@ std::vector<std::vector<double>> getBestTryphoneWaves(std::vector<std::vector<st
 void display(int samplingSize, std::vector<std::vector<UnitWave>> tryphones, std::vector<std::vector<std::vector<double>>> tryphoneWaves);
 
 int main() {
+
     int samplingSize = 44100;
     std::vector<UnitWave> unitWaves = getUnitWaves(samplingSize);
     std::vector<std::vector<UnitWave>> tryphones = getTryphones(unitWaves);
@@ -42,13 +46,11 @@ int main() {
 
     display(samplingSize, tryphones, tryphoneWaves);
 
-
     std::random_device random;     // 非決定的な乱数生成器
     std::mt19937 mt(random());
 
 
     // ここから音声書き換え開始
-
     for (int x = 0; x < 20; x++) {
 
 
@@ -266,10 +268,10 @@ int main() {
                 }
                 */
 
-                int len = ave + target[j] * 50;
+                int len = ave + target[j] * 60;
                 //int len = ave;
                 //
-                //insertCycle = LanczosResampling::convert(insertCycle, len);
+                insertCycle = LanczosResampling::convert(insertCycle, len);
 
                 // 挿入
                 for (int k = insertCycle.size() - 1; k >= 0; k--) {
@@ -285,10 +287,10 @@ int main() {
                 std::vector<double> modified = Util::CopyVector(inputForJulius, from, length);
                 //Gnuplot<double>::Output(modified, before + "-" + unit + "-" + after, "w l");
 
-                //gnuplotForWaves.push_back(modified);
+                gnuplotForWaves.push_back(modified);
                 std::string filename = "./pdf/image-" + before + "-" + unit + "-" + after + ".pdf";
-                //Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
-                Gnuplot<double>::Output(gnuplotForWaves[0], before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
+                Gnuplot<double>::Output2D(gnuplotForWaves, before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
+                //Gnuplot<double>::Output(gnuplotForWaves[0], before + "-" + unit + "-" + after, "w l", nullptr, true, filename.c_str());
             }
         }
 
@@ -427,7 +429,7 @@ std::vector<std::vector<UnitWave>> getTryphones(std::vector<UnitWave> &unitWaves
 std::vector<UnitWave> getUnitWaves(int samplingSize) {
     std::vector<UnitWave> unitWaves;
 
-    for (int h = 0; h <= 399; h++) {
+    for (int h = 0; h <= 99; h++) {
         auto inputForJulius = Util::GetInput("./resource/" + Util::toString(h) + ".wav", 0);
         JuliusImporter juliusImporter("./resource/" + Util::toString(h) + ".lab");
         auto juliusResults = juliusImporter.getJuliusResults();
